@@ -35,16 +35,13 @@ type LoginRequest = {
 };
 
 const ClientSideImage = dynamic(() => import("next/image"), { ssr: false });
-
 const queryClient = new QueryClient();
-
 const signInSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   password: z
     .string()
     .min(8, { message: "Password must be at least 8 characters" }),
 });
-
 function LoginPageContent() {
   const [isClient, setIsClient] = useState(false);
   const [error, setError] = useState<string | null>(null);
