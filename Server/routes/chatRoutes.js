@@ -162,4 +162,55 @@ router.get("/:chatId/history", async (req, res) => {
  *             answer: "The weather today is sunny."
  */
 
+router.get("/:userId", chatController.getchatbyuser);
+
+
+/**
+ * @swagger
+ * /chat/{userId}:
+ *   get:
+ *     summary: Fetch all chats for a specific user
+ *     tags: [Chats]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The unique identifier of the user
+ *     responses:
+ *       200:
+ *         description: Chats fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                     description: The unique identifier of the chat
+ *                   userId:
+ *                     type: string
+ *                     description: The unique identifier of the user
+ *                   message:
+ *                     type: string
+ *                     description: The chat message
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                     description: The timestamp when the chat was created
+ *                   updatedAt:
+ *                     type: string
+ *                     format: date-time
+ *                     description: The timestamp when the chat was last updated
+ *       400:
+ *         description: Invalid user ID
+ *       404:
+ *         description: No chats found for the user
+ *       500:
+ *         description: Internal server error
+ */
+
 module.exports = router;

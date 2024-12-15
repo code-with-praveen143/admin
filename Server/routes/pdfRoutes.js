@@ -360,4 +360,46 @@ router.get(
   pdfController.downloadAllPdfs
 );
 
+
+/**
+ * @swagger
+ * /api/pdfs/by-regulation:
+ *   get:
+ *     summary: Get PDF documents by regulation
+ *     tags: [PDFs]
+ *     parameters:
+ *       - in: query
+ *         name: regulation
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The regulation type to filter the PDFs
+ *     responses:
+ *       200:
+ *         description: PDFs fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 pdfs:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/PdfDocument'
+ *       400:
+ *         description: Regulation parameter is missing
+ *       404:
+ *         description: No PDFs found for the specified regulation
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/by-regulation",
+  authMiddleware,
+  pdfController.getPdfsByRegulation
+);
+
+
 module.exports = router;

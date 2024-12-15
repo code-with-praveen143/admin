@@ -179,4 +179,7 @@ router.delete("/users/:id", authMiddleware, userController.deleteUser);
 router.get("/users/:id/regulation", authMiddleware, userController.getUserRegulation);
 
 
+
+
+
 module.exports = router;

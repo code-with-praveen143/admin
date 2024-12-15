@@ -166,7 +166,7 @@ export default function PDFUploadPage() {
         regulation: pdfToEdit.regulation,
         course: pdfToEdit.course,
         subject: pdfToEdit.subject,
-        units: pdfToEdit.unit,
+        units: pdfToEdit.units,
       });
       setEditingId(id);
       setSelectedFiles([]);

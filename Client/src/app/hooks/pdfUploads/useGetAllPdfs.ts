@@ -11,7 +11,7 @@ type PDFUpload = {
   subject: string
   files: { fileName: string }[]
   uploadDate: string,
-  unit: string, // Initialize as empty
+  units: string, 
 }
 
 async function fetchPdfs(year?: string, semester?: string): Promise<PDFUpload[]> {

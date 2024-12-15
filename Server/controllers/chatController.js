@@ -177,6 +177,20 @@ const chatController = {
 
     return { chatId,createdAt: chat.createdAt, messages: chat.messages, userId: chat.userId};
   },
+
+  getchatbyuser:  async (req, res) => {
+    const { userId } = req.params;
+    try {
+      // Fetch all chats for the user
+      const chats = await Chat.find({ userId }).sort({ createdAt: -1 }); // Sort by latest
+      res.status(200).json(chats);
+    } catch (err) {
+      console.error("Error fetching user chats:", err);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
 };
+
+
 
 module.exports = chatController;

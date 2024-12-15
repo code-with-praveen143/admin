@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const { ObjectId } = require("mongoose").Types;
+const PdfUpload = require("../models/PdfUpload");
 
 exports.getUsers = async (req, res) => {
   try {
@@ -162,19 +163,19 @@ exports.getUserRegulation = async (req, res) => {
 
     // Fetch the user by ID
     const user = await User.findById(id).populate("regulation"); // Assuming `regulation` is a reference in the User model
+    const regulation = user.regulation
+    const pdfs = await PdfUpload.find({ regulation });
 
-    // Check if the user exists
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
+    const pdfResults = pdfs.map((pdf) => ({
+      id: pdf.id,
+      year: pdf.academicYear.year,
+      semester: pdf.academicYear.semester,
+      regulation: pdf.regulation,
+      subject: pdf.subject,
+    }));
 
-    // Return the user's regulation
     res.status(200).json({
-      success: true,
-      regulation: user.regulation,
+      pdfs: pdfResults
     });
   } catch (error) {
     console.error("Error fetching user regulation:", error);
@@ -268,5 +269,5 @@ exports.deleteUser = async (req, res) => {
       message: "Error deleting user",
       error: error.message,
     });
-  }
+  } 
 };

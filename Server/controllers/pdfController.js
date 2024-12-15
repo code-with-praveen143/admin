@@ -428,6 +428,7 @@ const pdfController = {
         .json({ message: "File upload failed", error: error.message });
     }
   },
+
   fetchPdfBuffer: async (filePath) => {
     try {
       const absolutePath = path.join(__dirname, "..", filePath);
@@ -438,6 +439,50 @@ const pdfController = {
       return null;
     }
   },
+
+  getPdfsByRegulation: async (req, res) => {
+    try {
+      const { regulation } = req.query;
+  
+      if (!regulation) {
+        return res.status(400).json({
+          error: "Regulation parameter is required",
+        });
+      }
+  
+      // Find PDFs matching the provided regulation
+      const pdfs = await PdfUpload.find({ regulation });
+  
+      if (!pdfs || pdfs.length === 0) {
+        return res.status(404).json({
+          error: "No PDFs found for the provided regulation",
+        });
+      }
+  
+      // Base URL for file access
+      const baseUrl = "http://localhost:5001/uploads";
+  
+      // Format the response
+      const pdfResults = pdfs.map((pdf) => ({
+        id: pdf.id,
+        academicYear: pdf.academicYear,
+        regulation: pdf.regulation,
+        subject: pdf.subject,
+      }));
+  
+      res.status(200).json({
+        success: true,
+        pdfs: pdfResults,
+      });
+    } catch (err) {
+      console.error("Error fetching PDFs by regulation:", err);
+      res.status(500).json({
+        error: "Failed to fetch PDFs by regulation",
+        details: err.message,
+      });
+    }
+  }
+  
 };
 
 module.exports = pdfController;

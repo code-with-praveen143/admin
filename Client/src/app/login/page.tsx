@@ -73,7 +73,12 @@ function LoginPageContent() {
       sessionStorage.setItem("user_id", response.user.id);
       sessionStorage.setItem("role", response.user.role);
       // Redirect to dashboard or home page
-      router.push("/dashboard");
+      if(response.user.role === "Student"){
+      router.push("/dashboard/chat");
+      }
+      else{
+        router.push("/dashboard");
+      }
     } catch (error) {
       console.error("Login error:", error);
       setError("Invalid credentials. Please try again.");

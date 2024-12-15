@@ -2,6 +2,7 @@ export type ChatResponse = {
   chatId: string;
   subject: string;
   regulation: string;
+  userId: string;
 };
 
 export interface Message {
