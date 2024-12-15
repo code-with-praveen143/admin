@@ -63,12 +63,13 @@ const chatController = {
       subject,
       regulation,
       messages: [],
-      relevantPdfs: result
+      relevantPdfs: result,
+      userId: userId
     });
   
     await chat.save();
   
-    return { chatId: chat._id, subject, regulation };
+    return { chatId: chat._id, subject, regulation,createdAt: chat.createdAt };
   },
   
   
@@ -165,13 +166,16 @@ const chatController = {
   },
 
   // Fetch chat history
-  getChatHistory: async ({ params }) => {
+  getChatHistory: async ({ params, query }) => {
     const { chatId } = params;
-
-    const chat = await Chat.findById(chatId);
+    const { userId } = query;
+    if (!userId) {
+      return res.status(400).json({ error: "UserId is required" });
+    }
+    const chat = await Chat.findById({ _id: chatId, userId });
     if (!chat) throw new Error("Chat session not found.");
 
-    return { chatId, messages: chat.messages };
+    return { chatId,createdAt: chat.createdAt, messages: chat.messages, userId: chat.userId};
   },
 };
 

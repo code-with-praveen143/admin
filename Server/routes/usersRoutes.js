@@ -143,4 +143,40 @@ router.put("/users/:id", authMiddleware, userController.updateUser);
  */
 router.delete("/users/:id", authMiddleware, userController.deleteUser);
 
+/**
+ * @swagger
+ * /api/users/{id}/regulation:
+ *   get:
+ *     summary: Get a user's regulation by ID
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the user
+ *     responses:
+ *       200:
+ *         description: User regulation fetched successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 regulation:
+ *                   type: object
+ *                   description: The regulation details of the user
+ *       400:
+ *         description: Invalid user ID
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Error fetching user regulation
+ */
+router.get("/users/:id/regulation", authMiddleware, userController.getUserRegulation);
+
+
 module.exports = router;

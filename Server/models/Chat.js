@@ -18,6 +18,15 @@ const ChatSchema = new mongoose.Schema({
     },
   ],
   relevantPdfs: [{ type: String }], // Array of file URLs as plain strings
+  createdAt: {
+    type: Date,
+    default: Date.now, // Timestamp for creation
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId, // Reference to the User model
+    ref: "User",
+    required: true, // Make this field required
+  }
 });
 
 const Chat = mongoose.model("Chat", ChatSchema);

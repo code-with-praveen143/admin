@@ -147,6 +147,46 @@ exports.updateUser = async (req, res) => {
     });
   }
 };
+
+exports.getUserRegulation = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validate the user ID
+    if (!id || !ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user ID",
+      });
+    }
+
+    // Fetch the user by ID
+    const user = await User.findById(id).populate("regulation"); // Assuming `regulation` is a reference in the User model
+
+    // Check if the user exists
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Return the user's regulation
+    res.status(200).json({
+      success: true,
+      regulation: user.regulation,
+    });
+  } catch (error) {
+    console.error("Error fetching user regulation:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching user regulation",
+      error: error.message,
+    });
+  }
+};
+
+
 exports.deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
