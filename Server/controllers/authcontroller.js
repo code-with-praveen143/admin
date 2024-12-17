@@ -5,6 +5,7 @@ const { sendOTP } = require("../services/emailService");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const redisClient = require("../config/redis"); // Redis client
+const generateReferralCode = require("../utils/referralGenerator");
 
 exports.signup = async (req, res) => {
   const {
@@ -39,10 +40,22 @@ exports.signup = async (req, res) => {
     // 3. Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 4. Determine if the user is a Student
+    // 4. Generate a unique referral code
+    let referralCode;
+    let isUnique = false;
+
+    while (!isUnique) {
+      referralCode = generateReferralCode();
+      const existingReferral = await User.findOne({ referral_code: referralCode });
+      if (!existingReferral) {
+        isUnique = true;
+      }
+    }
+
+    // 5. Determine if the user is a Student
     const isStudent = role === "Student";
 
-    // 5. Create a new user
+    // 6. Create a new user
     const newUser = await User.create({
       username,
       email,
@@ -53,14 +66,15 @@ exports.signup = async (req, res) => {
       program,
       specialization,
       regulation,
+      referral_code: referralCode,
       isVerified: isStudent ? false : true, // Auto-verify non-Student roles
     });
 
-    // 6. Handle OTP generation and email sending for Students
+    // 7. Handle OTP generation and email sending for Students
     if (isStudent) {
       const otp = generateOTP();
       console.log("Generated OTP:", otp); // Log for debugging
-      
+
       // Store OTP with expiration in the database
       newUser.otp = [
         {
@@ -74,18 +88,17 @@ exports.signup = async (req, res) => {
       await sendOTP(newUser.email, otp);
     }
 
-    // 7. Return success response
+    // 8. Return success response
     return res.status(200).json({
       message: isStudent
         ? "User registered successfully. OTP sent to email."
         : "User registered successfully.",
+      referralCode: referralCode,
       userId: newUser._id,
     });
   } catch (error) {
     console.error("Signup Error:", error.message);
-    return res
-      .status(500)
-      .json({ message: "Error registering user", error: error.message });
+    return res.status(500).json({ message: "Error registering user", error: error.message });
   }
 };
 

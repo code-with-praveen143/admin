@@ -16,45 +16,40 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       select: false,
-    }, 
+    },
+    referral_code: {
+      type: String,
+      unique: true, // Ensure the referral code is unique
+    },
     collegeName: {
       type: String,
-      required: function(){
+      required: function () {
         return this.role === "Student";
-      }
-    }, 
-
-    program:{
+      },
+    },
+    program: {
       type: String,
       required: function () {
         return this.role === "Student";
       },
-    }, 
-
-    specialization:{
+    },
+    specialization: {
       type: String,
       required: function () {
         return this.role === "Student";
       },
-    }, 
-
-    regulation:{
+    },
+    regulation: {
       type: String,
       required: function () {
         return this.role === "Student";
       },
-    }, 
-
-
-
-
-
+    },
     role: {
       type: String,
       enum: ["Student", "Admin", "Uploader", "SuperAdmin"],
       required: true,
     },
-   
     yearOfJoining: {
       type: Number,
       required: function () {
@@ -65,56 +60,22 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    isSuperAdmin: {
-      type: Boolean,
-      default: false,
-      // This field will be immutable once set to true
-      immutable: function() { return this.isSuperAdmin; }
-    },
     otp: [
       {
         code: { type: String, select: false },
         expiration: { type: Date, select: false },
       },
     ],
-
-    eventsRegistered: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Event'
-    }],
-    regulations: [String],
-    resetPasswordToken: String,
-    resetPasswordExpires: Date,
-    // events: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "Event",
-    // },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
   {
     timestamps: true,
-    toJSON: {
-      transform: (doc, ret, options) => {
-        ret.id = ret._id.toString();
-        delete ret._id;
-        // Never expose isSuperAdmin field in responses
-        delete ret.isSuperAdmin;
-        return ret;
-      },
-    }
   }
 );
 
-// Middleware to ensure only one SuperAdmin exists
-userSchema.pre('save', async function(next) {
-  if (this.role === 'SuperAdmin') {
-    const existingSuperAdmin = await this.constructor.findOne({ role: 'SuperAdmin' });
-    if (existingSuperAdmin && existingSuperAdmin._id.toString() !== this._id.toString()) {
-      throw new Error('Only one Super Admin can exist in the system');
-    }
-  }
-  next();
-});
-
+// Model
 const User = mongoose.model("User", userSchema);
-
 module.exports = User;
