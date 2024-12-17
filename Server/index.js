@@ -20,6 +20,7 @@ const { requestLogger, ipLogger } = require("./middleware/requestLogger"); // Im
 const http = require("http");
 const { Server } = require("socket.io");
 const chatController = require("./controllers/chatController");
+const feedbackRoutes = require("./routes/feedbackRoute");
 require("dotenv").config();
 
 const app = express();
@@ -68,6 +69,8 @@ app.use("/api/events", eventsRoutes);
 app.use("/api", userRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api", notificationRoutes);
+app.use("/api/feedback", feedbackRoutes);
+
 
 // Socket.IO Integration
 io.on("connection", (socket) => {

@@ -36,7 +36,6 @@ export default function Chatbot() {
   const [chatHistory, setChatHistory] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { theme, setTheme } = useTheme();
-  console.log("Chat history", chatHistory);
   // Fetch data using hooks
   const {
     data: pdfUploads,
