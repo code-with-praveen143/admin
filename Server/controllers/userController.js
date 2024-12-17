@@ -172,6 +172,7 @@ exports.getUserRegulation = async (req, res) => {
       semester: pdf.academicYear.semester,
       regulation: pdf.regulation,
       subject: pdf.subject,
+      units: pdf.units,
     }));
 
     res.status(200).json({

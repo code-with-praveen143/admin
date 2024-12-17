@@ -6,16 +6,43 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const redisClient = require("../config/redis"); // Redis client
 
-// User Signup
 exports.signup = async (req, res) => {
-  const { username, email, password, role, yearOfJoining,collegeName,program,specialization,regulation } = req.body;
+  const {
+    username,
+    email,
+    password,
+    role,
+    yearOfJoining,
+    collegeName,
+    program,
+    specialization,
+    regulation,
+  } = req.body;
 
   try {
+    // 1. Check if the username already exists
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
+      return res
+        .status(400)
+        .json({ message: "Username already exists. Please choose another." });
+    }
+
+    // 2. Check if the email already exists
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail) {
+      return res
+        .status(400)
+        .json({ message: "Email already exists. Please use another email." });
+    }
+
+    // 3. Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Check if the user is a student or an admin/uploader
+    // 4. Determine if the user is a Student
     const isStudent = role === "Student";
 
+    // 5. Create a new user
     const newUser = await User.create({
       username,
       email,
@@ -26,37 +53,84 @@ exports.signup = async (req, res) => {
       program,
       specialization,
       regulation,
-      isVerified: isStudent? false : true, // Admins and uploaders are automatically verified
+      isVerified: isStudent ? false : true, // Auto-verify non-Student roles
     });
 
-    // Generate and send OTP only for students
+    // 6. Handle OTP generation and email sending for Students
     if (isStudent) {
       const otp = generateOTP();
-      console.log("Generated OTP:", otp); // Add this log
-     // Send OTP via email
-
-      // Store OTP and its expiration time in the user model
-      newUser.otp = [{
-        code: otp.toString(),
-        expiration: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes from now
-      }];
+      console.log("Generated OTP:", otp); // Log for debugging
       
+      // Store OTP with expiration in the database
+      newUser.otp = [
+        {
+          code: otp.toString(),
+          expiration: new Date(Date.now() + 5 * 60 * 1000), // Valid for 5 minutes
+        },
+      ];
       await newUser.save();
-      await sendOTP(newUser.email, otp); 
+
+      // Send OTP via email
+      await sendOTP(newUser.email, otp);
     }
 
+    // 7. Return success response
     return res.status(200).json({
       message: isStudent
-        ? "User registered successfully, OTP sent to email"
-        : "User registered successfully",
+        ? "User registered successfully. OTP sent to email."
+        : "User registered successfully.",
       userId: newUser._id,
     });
   } catch (error) {
+    console.error("Signup Error:", error.message);
     return res
       .status(500)
       .json({ message: "Error registering user", error: error.message });
   }
 };
+
+
+exports.resendOTP = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    if (user.isVerified) {
+      return res
+        .status(400)
+        .json({ message: "User is already verified." });
+    }
+
+    const otp = generateOTP();
+    console.log("New OTP:", otp);
+
+    // Store the new OTP
+    user.otp = [
+      {
+        code: otp.toString(),
+        expiration: new Date(Date.now() + 5 * 60 * 1000), // Valid for 5 minutes
+      },
+    ];
+    await user.save();
+
+    // Send the new OTP
+    await sendOTP(user.email, otp);
+
+    return res.status(200).json({
+      message: "A new OTP has been sent to your email.",
+    });
+  } catch (error) {
+    console.error("Resend OTP Error:", error);
+    return res
+      .status(500)
+      .json({ message: "Error resending OTP.", error: error.message });
+  }
+};
+
 
 // Verify OTP
 exports.verifyOTP = async (req, res) => {

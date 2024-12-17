@@ -166,6 +166,71 @@ router.post("/signup", authController.signup);
  */
 router.post("/login", authController.login);
 
+
+/**
+ * @swagger
+ * /api/auth/resend-otp:
+ *   post:
+ *     summary: Resend OTP to user's email
+ *     description: This endpoint allows users to request a new OTP if their previous OTP expired.
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: user@example.com
+ *             required:
+ *               - email
+ *     responses:
+ *       200:
+ *         description: OTP resent successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: A new OTP has been sent to your email.
+ *       400:
+ *         description: User already verified or invalid email
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User is already verified.
+ *       404:
+ *         description: User not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: User not found.
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Error resending OTP.
+ */
+router.post("/resend-otp", authController.resendOTP);
+
 /**
  * @swagger
  * /api/auth/verify-otp:
@@ -423,5 +488,9 @@ router.post(
   "/confirm-reset-password",
   resetPasswordController.confirmResetPassword
 );
+
+
+
+
 
 module.exports = router;

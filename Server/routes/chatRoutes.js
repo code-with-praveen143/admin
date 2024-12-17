@@ -69,7 +69,7 @@ router.post("/ask", async (req, res) => {
  * @swagger
  * /api/chat/{chatId}/history:
  *   get:
- *     summary: Get chat history
+ *     summary: Get chat history for a specific user and chat session
  *     tags: [Chat]
  *     parameters:
  *       - in: path
@@ -78,6 +78,12 @@ router.post("/ask", async (req, res) => {
  *           type: string
  *         required: true
  *         description: The ID of the chat session
+ *       - in: query
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: The ID of the user requesting the chat history
  *     responses:
  *       200:
  *         description: Successfully retrieved chat history
@@ -87,7 +93,12 @@ router.post("/ask", async (req, res) => {
  *               $ref: '#/components/schemas/ChatHistoryResponse'
  *       400:
  *         description: Bad request
+ *       404:
+ *         description: Chat or user not found
+ *       500:
+ *         description: Internal server error
  */
+
 router.get("/:chatId/history", async (req, res) => {
   try {
     const response = await chatController.getChatHistory(req);
@@ -99,118 +110,33 @@ router.get("/:chatId/history", async (req, res) => {
 
 /**
  * @swagger
- * components:
- *   schemas:
- *     ChatStartRequest:
- *       type: object
- *       required:
- *         - userId
- *       properties:
- *         userId:
- *           type: string
- *           description: The ID of the user starting the chat
- *       example:
- *         userId: abc123
- *     ChatAskRequest:
- *       type: object
- *       required:
- *         - chatId
- *         - question
- *       properties:
- *         chatId:
- *           type: string
- *           description: The ID of the chat session
- *         question:
- *           type: string
- *           description: The question being asked
- *       example:
- *         chatId: xyz789
- *         question: What is the weather today?
- *     ChatResponse:
- *       type: object
- *       properties:
- *         chatId:
- *           type: string
- *           description: The ID of the chat session
- *         message:
- *           type: string
- *           description: The response message
- *       example:
- *         chatId: xyz789
- *         message: "The weather today is sunny."
- *     ChatHistoryResponse:
- *       type: object
- *       properties:
- *         chatId:
- *           type: string
- *           description: The ID of the chat session
- *         history:
- *           type: array
- *           items:
- *             type: object
- *             properties:
- *               question:
- *                 type: string
- *                 description: The question asked
- *               answer:
- *                 type: string
- *                 description: The response to the question
- *       example:
- *         chatId: xyz789
- *         history:
- *           - question: "What is the weather today?"
- *             answer: "The weather today is sunny."
- */
-
-router.get("/:userId", chatController.getchatbyuser);
-
-
-/**
- * @swagger
- * /chat/{userId}:
+ * /api/chat/{userId}:
  *   get:
- *     summary: Fetch all chats for a specific user
- *     tags: [Chats]
+ *     summary: Get all chats by a user
+ *     tags: [Chat]
  *     parameters:
  *       - in: path
  *         name: userId
  *         schema:
  *           type: string
  *         required: true
- *         description: The unique identifier of the user
+ *         description: The ID of the user whose chats are being fetched
  *     responses:
  *       200:
- *         description: Chats fetched successfully
+ *         description: Successfully retrieved user chats
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 type: object
- *                 properties:
- *                   _id:
- *                     type: string
- *                     description: The unique identifier of the chat
- *                   userId:
- *                     type: string
- *                     description: The unique identifier of the user
- *                   message:
- *                     type: string
- *                     description: The chat message
- *                   createdAt:
- *                     type: string
- *                     format: date-time
- *                     description: The timestamp when the chat was created
- *                   updatedAt:
- *                     type: string
- *                     format: date-time
- *                     description: The timestamp when the chat was last updated
- *       400:
- *         description: Invalid user ID
+ *                 $ref: '#/components/schemas/ChatResponse'
  *       404:
- *         description: No chats found for the user
+ *         description: User not found or no chats available
  *       500:
  *         description: Internal server error
  */
+
+router.get("/:userId", chatController.getChatByUser);
+
 
 module.exports = router;

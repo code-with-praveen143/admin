@@ -108,5 +108,3 @@ exports.getCardById = async (req, res) => {
       .json({ message: "Error fetching card", error: error.message });
   }
 };
-
-console.log("Card controller loaded successfully");

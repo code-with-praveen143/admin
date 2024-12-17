@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -21,7 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useVerifyOTP } from "../hooks/auth/useAuth";
+import { useResendOTP, useVerifyOTP } from "../hooks/auth/useAuth";
 
 type OtpVerificationRequest = {
   otp: string;
@@ -33,14 +33,37 @@ const otpSchema = z.object({
 
 const OtpVerification = () => {
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [timer, setTimer] = useState(30);
+  const [isResendDisabled, setIsResendDisabled] = useState(true);
   const router = useRouter();
+
   const verifyOtpMutation = useVerifyOTP();
+  const resendOtpMutation = useResendOTP();
+
   const form = useForm({
     resolver: zodResolver(otpSchema),
     defaultValues: {
       otp: "",
     },
   });
+
+  useEffect(() => {
+    let countdown: NodeJS.Timeout;
+    if (isResendDisabled) {
+      countdown = setInterval(() => {
+        setTimer((prev) => {
+          if (prev === 1) {
+            clearInterval(countdown);
+            setIsResendDisabled(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(countdown);
+  }, [isResendDisabled]);
 
   const onSubmit = async (data: OtpVerificationRequest) => {
     try {
@@ -50,14 +73,31 @@ const OtpVerification = () => {
         return;
       }
       await verifyOtpMutation.mutateAsync({ otp: data.otp, email });
+      
       router.push("/login");
     } catch (error) {
       setError("OTP verification failed. Please try again.");
     }
   };
 
+  const handleResendOTP = async () => {
+    try {
+      setIsResendDisabled(true);
+      setTimer(30);
+      const email = sessionStorage.getItem("signup_email");
+      if (!email) {
+        setError("Email is missing. Please sign up again.");
+        return;
+      }
+      await resendOtpMutation.mutateAsync({ email });
+      setSuccess("A new OTP has been sent to your email.");
+    } catch (error) {
+      setError("Failed to resend OTP. Please try again.");
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
@@ -90,16 +130,29 @@ const OtpVerification = () => {
               <Button
                 type="submit"
                 className="w-full"
-                // disabled={verifyOtpMutation.isLoading}
+                disabled={verifyOtpMutation.isPending}
               >
-                {/* {verifyOtpMutation.isLoading ? "Verifying..." : "Verify OTP"} */}
-                Verify OTP
+                {verifyOtpMutation.isPending ? "Verifying..." : "Verify OTP"}
               </Button>
             </form>
           </Form>
           {error && (
             <p className="text-red-500 text-sm mt-2 text-center">{error}</p>
           )}
+          {success && (
+            <p className="text-green-500 text-sm mt-2 text-center">{success}</p>
+          )}
+          <div className="mt-4 text-center">
+            <Button
+              variant="link"
+              onClick={handleResendOTP}
+              disabled={isResendDisabled}
+            >
+              {isResendDisabled
+                ? `Resend OTP in ${timer}s`
+                : "Resend OTP"}
+            </Button>
+          </div>
         </CardContent>
         <CardFooter className="justify-center">
           <Button variant="link" onClick={() => router.push("/signup")}>

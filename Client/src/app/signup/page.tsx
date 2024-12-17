@@ -31,18 +31,25 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useGetColleges } from "../hooks/colleges/useGetColleges";
 import { CollegeData, Program, Regulation } from "../@types/college";
-import { Loader } from 'lucide-react';
+import { Eye, EyeOff, Loader } from "lucide-react";
 import { useSignUp } from "../hooks/auth/useAuth";
+import { useTheme } from "next-themes";
 
 const signUpSchema = z
   .object({
-    username: z.string().min(3, { message: "Username must be at least 3 characters" }),
+    username: z
+      .string()
+      .min(3, { message: "Username must be at least 3 characters" }),
     email: z.string().email({ message: "Invalid email address" }),
-    password: z.string().min(8, { message: "Password must be at least 8 characters" }),
+    password: z
+      .string()
+      .min(8, { message: "Password must be at least 8 characters" }),
     role: z.enum(["Student", "Admin", "Uploader"]),
     collegeName: z.string().min(1, { message: "College name is required" }),
     program: z.string().min(1, { message: "Program is required" }),
-    specialization: z.string().min(1, { message: "Specialization is required" }),
+    specialization: z
+      .string()
+      .min(1, { message: "Specialization is required" }),
     regulation: z.string().min(1, { message: "Regulation is required" }),
     yearOfJoining: z.number().int().min(1900).max(new Date().getFullYear()),
   })
@@ -64,6 +71,9 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
+  const { theme, setTheme } = useTheme();
+
   const router = useRouter();
   const { data: colleges, isLoading: isLoadingColleges } = useGetColleges();
 
@@ -87,15 +97,25 @@ export default function SignupPage() {
   const onSignUpSubmit = async (data: SignupRequest) => {
     try {
       setIsLoading(true);
+      setError(null); // Reset errors before submission
       sessionStorage.setItem("signup_email", data.email);
       await signUpMutation.mutateAsync(data);
+
       // Simulate a delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       setIsLoading(false);
+
       router.push("/otp-verification");
-    } catch (error) {
-      setError("Signup failed. Please try again.");
+    } catch (error: any) {
       setIsLoading(false);
+
+      // Display the specific error message from the server
+      if (error.message) {
+        console.log("ERROR MESSAGE: ", error);
+        setError(error.message); // Show the error from the backend
+      } else {
+        setError("An unexpected error occurred. Please try again.");
+      }
     }
   };
 
@@ -106,9 +126,13 @@ export default function SignupPage() {
   const watchCollege = signUpForm.watch("collegeName");
   const watchProgram = signUpForm.watch("program");
 
-  const selectedCollege = colleges?.find((college: { _id: string; }) => college._id === watchCollege);
+  const selectedCollege = colleges?.find(
+    (college: { _id: string }) => college._id === watchCollege
+  );
   const programs = selectedCollege?.programs || [];
-  const selectedProgram = programs.find((program: { name: string; }) => program.name === watchProgram);
+  const selectedProgram = programs.find(
+    (program: { name: string }) => program.name === watchProgram
+  );
   const specializations = selectedProgram?.specializations || [];
   const regulations = selectedProgram?.regulations || [];
 
@@ -120,7 +144,10 @@ export default function SignupPage() {
         </CardHeader>
         <CardContent>
           <Form {...signUpForm}>
-            <form onSubmit={signUpForm.handleSubmit(onSignUpSubmit)} className="space-y-6">
+            <form
+              onSubmit={signUpForm.handleSubmit(onSignUpSubmit)}
+              className="space-y-6"
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <FormField
@@ -164,11 +191,29 @@ export default function SignupPage() {
                       <FormItem>
                         <FormLabel>Password</FormLabel>
                         <FormControl>
-                          <Input
-                            {...field}
-                            type="password"
-                            placeholder="Your password"
-                          />
+                          <div className="relative">
+                            <Input
+                              {...field}
+                              type={showPassword ? "text" : "password"}
+                              placeholder="Your password"
+                              className="pr-10" // Add padding to make space for the eye icon
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                            >
+                              {showPassword ? (
+                                <EyeOff className={`h-6 w-6 text-${
+                                  theme === "dark" ? "white" : "gray-800"
+                                }`} />
+                              ) : (
+                                <Eye className={`h-6 w-6 text-${
+                                  theme === "dark" ? "white" : "gray-800"
+                                }`} />
+                              )}
+                            </button>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -184,7 +229,10 @@ export default function SignupPage() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>College Name</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select your college" />
@@ -192,7 +240,10 @@ export default function SignupPage() {
                               </FormControl>
                               <SelectContent>
                                 {colleges?.map((college: any) => (
-                                  <SelectItem key={college._id} value={college._id}>
+                                  <SelectItem
+                                    key={college._id}
+                                    value={college._id}
+                                  >
                                     {college.collegeName}
                                   </SelectItem>
                                 ))}
@@ -210,7 +261,10 @@ export default function SignupPage() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Program</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select your program" />
@@ -218,7 +272,10 @@ export default function SignupPage() {
                               </FormControl>
                               <SelectContent>
                                 {programs.map((program: Program) => (
-                                  <SelectItem key={program.name} value={program.name}>
+                                  <SelectItem
+                                    key={program.name}
+                                    value={program.name}
+                                  >
                                     {program.name}
                                   </SelectItem>
                                 ))}
@@ -236,7 +293,10 @@ export default function SignupPage() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Specialization</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select your specialization" />
@@ -244,7 +304,10 @@ export default function SignupPage() {
                               </FormControl>
                               <SelectContent>
                                 {specializations.map((specialization: any) => (
-                                  <SelectItem key={specialization} value={specialization}>
+                                  <SelectItem
+                                    key={specialization}
+                                    value={specialization}
+                                  >
                                     {specialization}
                                   </SelectItem>
                                 ))}
@@ -262,7 +325,10 @@ export default function SignupPage() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Regulation</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Select your regulation" />
@@ -270,7 +336,10 @@ export default function SignupPage() {
                               </FormControl>
                               <SelectContent>
                                 {regulations.map((regulation: Regulation) => (
-                                  <SelectItem key={regulation.regulation} value={regulation.regulation}>
+                                  <SelectItem
+                                    key={regulation.regulation}
+                                    value={regulation.regulation}
+                                  >
                                     {regulation.regulation}
                                   </SelectItem>
                                 ))}
@@ -293,7 +362,9 @@ export default function SignupPage() {
                                 {...field}
                                 type="number"
                                 placeholder="Year of joining"
-                                onChange={(e) => field.onChange(Number(e.target.value))}
+                                onChange={(e) =>
+                                  field.onChange(Number(e.target.value))
+                                }
                               />
                             </FormControl>
                             <FormMessage />
@@ -334,4 +405,3 @@ export default function SignupPage() {
     </div>
   );
 }
-
