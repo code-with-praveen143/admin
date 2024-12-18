@@ -136,7 +136,7 @@ router.get("/:chatId/history", async (req, res) => {
  *         description: Internal server error
  */
 
-router.get("/:userId", chatController.getChatByUser);
+router.get("/:userId", chatController.getchatbyuser);
 
 
 module.exports = router;
