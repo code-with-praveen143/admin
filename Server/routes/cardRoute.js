@@ -22,7 +22,7 @@ router.get('/cards', cardController.getAllCards);
  * /api/cards/{id}:
  *   get:
  *     summary: Get Card by ID
- *     tags: [Card]
+ *     tags: [Cards]
  *     responses:
  *       200:
  *         description: A card is returned
@@ -109,35 +109,5 @@ router.put('/cards/:id', cardController.updateCardById);
  *         description: The card was not found
  */
 router.delete('/cards/:id', cardController.deleteCardById);
-
-/**
- * @swagger
- * components:
- *   schemas:
- *     Card:
- *       type: object
- *       required:
- *         - title
- *         - description
- *       properties:
- *         id:
- *           type: string
- *           description: The auto-generated id of the card
- *         title:
- *           type: string
- *           description: The card title
- *         description:
- *           type: string
- *           description: The card description
- *         createdAt:
- *           type: string
- *           format: date
- *           description: The date the card was added
- *       example:
- *         id: d5fE_asz
- *         title: New Task
- *         description: Implement new feature
- *         createdAt: 2023-06-20T03:24:00
- */
 
 module.exports = router;

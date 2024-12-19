@@ -49,6 +49,23 @@ module.exports = {
   },
 
   /**
+   * @description Get feedback by feedback ID
+   */
+  getFeedbacks: async (req, res) => {
+
+    try {
+      const feedbacks = await Feedback.find();
+      if (!feedbacks) {
+        return res.status(404).json({ message: "Feedbacks not found." });
+      }
+      return res.status(200).json(feedbacks);
+    } catch (err) {
+      console.error("Error fetching feedback:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
+    }
+  },
+
+  /**
    * @description Get feedback by user ID
    */
   getFeedbackByUserId: async (req, res) => {

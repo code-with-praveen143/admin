@@ -78,6 +78,26 @@ router.get("/:feedbackId", feedbackController.getFeedbackById);
 
 /**
  * @swagger
+ * /api/feedback:
+ *   get:
+ *     summary: Get feedbacks
+ *     tags: [Feedback]
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved user feedbacks
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/", feedbackController.getFeedbacks);
+
+
+/**
+ * @swagger
  * /api/feedback/user/{userId}:
  *   get:
  *     summary: Get feedback by user ID
