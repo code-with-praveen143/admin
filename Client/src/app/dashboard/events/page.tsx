@@ -708,10 +708,10 @@ const EventManagement = () => {
               <ScrollArea className="h-[300px] w-full rounded-md border p-4">
                 {students?.map((student) => (
                   <Button
-                    key={student._id}
+                    key={student.id}
                     variant="ghost"
                     className="w-full justify-start text-left mb-2"
-                    onClick={() => handleStudentSelect(student._id)}
+                    onClick={() => handleStudentSelect(student.id)}
                   >
                     {student.username}
                   </Button>
