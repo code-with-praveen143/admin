@@ -44,7 +44,7 @@ const sendOTP = async (to, otp) => {
 // Function to send reset password email
 const sendResetPasswordEmail = async (to, resetToken) => {
   // You can replace this with your frontend URL
-  const resetLink = `http://localhost:3000/dashboard/reset-password?token=${resetToken}`;
+  const resetLink = `https://campusify-admin-app.vercel.app/reset-password?token=${resetToken}`;
 
   const mailOptions = {
     from: EMAIL,

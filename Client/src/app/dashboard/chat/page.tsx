@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Plus, Send, Loader2 } from "lucide-react";
+import { Plus, Send, Loader2, Edit, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -48,7 +48,6 @@ export default function Chatbot() {
     const user_id = sessionStorage.getItem("user_id");
     if (user_id) {
       setUserId(user_id);
-      fetchChatHistory(chatId, userId);
     }
     const prefersDark = window.matchMedia(
       "(prefers-color-scheme: dark)"
@@ -82,7 +81,6 @@ export default function Chatbot() {
           title: chat.messages[0]?.content || "Untitled Chat", // Use first message content as title
         }));
 
-        setChatHistory(formattedChats);
       }
     } catch (error) {
       console.error("Error fetching chat history:", error);
@@ -144,7 +142,6 @@ export default function Chatbot() {
         const data: ChatResponse = await response.json();
         setChatId(data.chatId);
         setStep("chat");
-        fetchChatHistory(data.chatId, data.userId);
       }
     } catch (error) {
       console.error("Error starting chat:", error);
@@ -208,7 +205,6 @@ export default function Chatbot() {
           },
         },
       ]);
-      fetchChatHistory(chatId, userId);
       setQuestion("");
     } catch (error) {
       console.error("Error asking question:", error);
@@ -274,7 +270,7 @@ export default function Chatbot() {
   return (
     <div
       className={cn(
-        "flex flex-col h-screen",
+        "flex flex-col min-h-screen",
         theme === "dark" ? "dark bg-gray-900 text-white" : "bg-white"
       )}
     >
@@ -297,7 +293,7 @@ export default function Chatbot() {
           </Button>
         </div>
       </header>
-
+  
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <div
@@ -314,7 +310,7 @@ export default function Chatbot() {
           >
             <Plus className="mr-2 h-4 w-4" /> New Chat
           </Button>
-
+  
           <ScrollArea className="flex-grow">
             {categorizeChats(chatHistory).map(({ title, chats }) => (
               <div key={title}>
@@ -335,6 +331,7 @@ export default function Chatbot() {
                       setChatId(chat.chatId);
                       setMessages(chat.messages);
                       setStep("chat");
+                      fetchChatHistory(chat.chatId, userId);
                     }}
                   >
                     {chat.title}
@@ -344,13 +341,13 @@ export default function Chatbot() {
             ))}
           </ScrollArea>
         </div>
-
+  
         {/* Main Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Chat Area */}
           <ScrollArea className="flex-1 p-4">
             {step === "initial" ? (
-              <div className="space-y-4 max-w-md mx-auto">
+              <div className="space-y-6 max-w-lg mx-auto">
                 {/* Dropdown Selectors */}
                 <Select value={year} onValueChange={setYear}>
                   <SelectTrigger>
@@ -449,12 +446,12 @@ export default function Chatbot() {
                 </Button>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-6 max-w-3xl mx-auto">
                 {messages.map((message, index) => (
                   <div
                     key={index}
                     className={cn(
-                      "p-4 rounded-lg max-w-[80%]",
+                      "p-4 rounded-lg max-w-[80%] relative",
                       message.role === "user"
                         ? "bg-blue-600 text-white ml-auto"
                         : theme === "dark"
@@ -469,6 +466,19 @@ export default function Chatbot() {
                       </div>
                     ) : (
                       message.content
+                    )}
+                    {message.role === "user" && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 right-2"
+                        onClick={() => {
+                          setQuestion(message.content);
+                          setStep("chat");
+                        }}
+                      >
+                        <Pencil className="h-4 w-4 text-white" />
+                      </Button>
                     )}
                   </div>
                 ))}
@@ -500,4 +510,6 @@ export default function Chatbot() {
       </div>
     </div>
   );
+  
+  
 }

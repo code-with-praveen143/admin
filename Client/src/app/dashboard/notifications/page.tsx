@@ -28,6 +28,8 @@ import { useState } from "react";
 import { useCreateNotification } from "@/app/hooks/notification/useCreateNotification";
 import { useGetNotifications } from "@/app/hooks/notification/useGetNotifications";
 import { useDeleteNotification } from "@/app/hooks/notification/useDeleteNotification";
+import { cn } from "@/lib/utils";
+import { useTheme } from "next-themes";
 
 export default function NotificationsPage() {
   const { data: notifications, isLoading } = useGetNotifications();
@@ -36,7 +38,7 @@ export default function NotificationsPage() {
   const [description, setDescription] = useState("");
   const createNotification = useCreateNotification();
   const deleteNotification = useDeleteNotification();
-
+  const { theme, setTheme } = useTheme();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -81,11 +83,17 @@ export default function NotificationsPage() {
   }
 
   return (
+    <>
     <div className="container mx-auto px-4 py-8">
-      <Card className="w-full bg-white shadow-lg rounded-lg">
+    <Card
+       className={cn(
+         "w-full shadow-lg rounded-lg",
+         theme === "dark" ? "dark bg-black text-white" : "bg-white"
+       )}
+     >
         <CardHeader className="space-y-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-            <CardTitle className="text-2xl font-semibold text-gray-800">
+            <CardTitle className="text-2xl font-semibold  ">
               Notifications
               <Badge variant="secondary" className="ml-2 bg-primary/10 text-primary">
                 {notifications?.length} New
@@ -142,7 +150,7 @@ export default function NotificationsPage() {
               </DialogContent>
             </Dialog>
           </div>
-          <CardDescription className="text-gray-600">
+          <CardDescription className="text-gray-700">
             Manage your system notifications.
           </CardDescription>
         </CardHeader>
@@ -158,11 +166,11 @@ export default function NotificationsPage() {
               {notifications?.map((notification: any) => (
                 <div
                   key={notification._id}
-                  className="flex items-center justify-between bg-gray-50 p-4 rounded-md shadow-sm hover:bg-gray-100 transition"
+                  className="flex items-center justify-between   p-4 rounded-md shadow-sm   transition"
                 >
                   <div>
-                    <h3 className="text-lg font-medium text-gray-800">{notification.title}</h3>
-                    <p className="text-sm text-gray-600">{notification.description}</p>
+                    <h3 className="text-lg font-medium">{notification.title}</h3>
+                    <p className="text-sm ">{notification.description}</p>
                   </div>
                   <Button
                     variant="ghost"
@@ -179,5 +187,6 @@ export default function NotificationsPage() {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 }

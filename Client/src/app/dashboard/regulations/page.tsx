@@ -116,103 +116,128 @@ export default function Component() {
   if (isLoading) return <div>Loading...</div>
 
   return (
-    <div className="container mx-auto p-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-2xl font-bold">Regulations</CardTitle>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button onClick={() => {
-                setEditingId(null)
-                form.reset()
-              }}>
-                <Plus className="mr-2 h-4 w-4" /> Add Regulation
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>{editingId ? 'Edit Regulation' : 'Create New Regulation'}</DialogTitle>
-              </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="regulation_category"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Regulation Category</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter category" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="regulation_type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Regulation Type</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter type" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="year_validation"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Year Validation</FormLabel>
-                        <FormControl>
-                          <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value))} />
-                        </FormControl>
-                        <FormDescription>Enter a year between 1900 and 2100</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="w-full">
-                    {editingId ? 'Update' : 'Create'} Regulation
-                  </Button>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Category</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Year</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {regulations?.map((regulation: Regulation) => (
-                <TableRow key={regulation._id}>
-                  <TableCell>{regulation.regulation_category}</TableCell>
-                  <TableCell>{regulation.regulation_type}</TableCell>
-                  <TableCell>{regulation.year_validation}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="outline" size="icon" onClick={() => handleEdit(regulation)} className="mr-2">
-                      <Pencil className="h-4 w-4" />
+    <div className="flex flex-col min-h-screen">
+      <div className="container mx-auto p-4">
+        <Card className="shadow-lg rounded-lg">
+          <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4">
+            <CardTitle className="text-2xl font-bold mb-4 sm:mb-0 text-primary">Regulations</CardTitle>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  onClick={() => {
+                    setEditingId(null);
+                    form.reset();
+                  }}
+                  className="flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+                >
+                  <Plus className="mr-2 h-4 w-4" /> Add Regulation
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>{editingId ? 'Edit Regulation' : 'Create New Regulation'}</DialogTitle>
+                </DialogHeader>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="regulation_category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Regulation Category</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter category" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="regulation_type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Regulation Type</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter type" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="year_validation"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Year Validation</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              onChange={(e) => field.onChange(parseInt(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormDescription>Enter a year between 1900 and 2100</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button
+                      type="submit"
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg"
+                    >
+                      {editingId ? 'Update' : 'Create'} Regulation
                     </Button>
-                    <Button variant="outline" size="icon" onClick={() => handleDelete(regulation._id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <Table className="w-full border rounded-lg">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Year</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {regulations?.map((regulation: Regulation) => (
+                    <TableRow key={regulation._id} className="hover:bg-gray-100 dark:hover:bg-gray-800">
+                      <TableCell>{regulation.regulation_category}</TableCell>
+                      <TableCell>{regulation.regulation_type}</TableCell>
+                      <TableCell>{regulation.year_validation}</TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleEdit(regulation)}
+                          className="mr-2 border-gray-300 hover:bg-gray-200 dark:border-gray-700 dark:hover:bg-gray-700"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleDelete(regulation._id)}
+                          className="border-gray-300 hover:bg-gray-200 dark:border-gray-700 dark:hover:bg-gray-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
-  )
+  );
+  
 }

@@ -117,117 +117,154 @@ export default function InternshipPage() {
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader className="space-y-1">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <CardTitle className="text-xl md:text-2xl lg:text-3xl text-primary">
+    <div className="min-h-screen bg-background p-2 md:p-4 lg:p-6">
+      <div className="mx-auto max-w-7xl space-y-2">
+        {/* Header Section */}
+        <div className="flex flex-col space-y-2">
+          <h1 className="text-2xl font-bold tracking-tight md:text-3xl lg:text-4xl text-primary">
             Internship Management
-          </CardTitle>
-          <Button
-            onClick={handleExport}
-            className="w-full sm:w-auto"
-          >
-            <Download className="mr-2 h-4 w-4" /> Export Report
-          </Button>
+          </h1>
+          <p className="text-sm text-muted-foreground md:text-base">
+            Manage internship opportunities and track applicant progress
+          </p>
         </div>
-        <CardDescription className="text-sm md:text-base text-gray-400">
-          Manage internship opportunities and track applicant progress.
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent>
-        {/* Add/Edit Form Section */}
-        
-
-        {/* Table Section */}
-        <div className="rounded-md border overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Company</TableHead>
-                <TableHead className="hidden sm:table-cell">Position</TableHead>
-                <TableHead className="hidden md:table-cell">Description</TableHead>
-                <TableHead>Applicants</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {internships?.map((internship) => (
-                <TableRow key={internship.id}>
-                  <TableCell className="font-medium">
-                    <div>{internship.company}</div>
-                    <div className="text-sm text-muted-foreground sm:hidden">
-                      {internship.position}
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    {internship.position}
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    {internship.description}
-                  </TableCell>
-                  <TableCell>{internship.applicants.length}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleEdit(internship.id)}
-                        className="h-8 w-8"
+  
+        {/* Main Content */}
+        <Card className="border-border/40 shadow-sm">
+          <CardHeader className="space-y-1 px-6">
+            <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+              <CardTitle className="text-xl font-semibold">Active Internships</CardTitle>
+              <Button 
+                onClick={handleExport}
+                className="w-full sm:w-auto bg-primary hover:bg-primary/90"
+              >
+                <Download className="mr-2 h-4 w-4" /> Export Report
+              </Button>
+            </div>
+          </CardHeader>
+  
+          <CardContent className="px-6">
+            {/* Table Section with improved responsive design */}
+            <div className="rounded-md border overflow-hidden">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/50">
+                      <TableHead className="w-[200px] font-semibold">Company</TableHead>
+                      <TableHead className="hidden sm:table-cell font-semibold">Position</TableHead>
+                      <TableHead className="hidden md:table-cell font-semibold">Description</TableHead>
+                      <TableHead className="w-[100px] font-semibold">Applicants</TableHead>
+                      <TableHead className="w-[140px] text-right font-semibold">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {internships?.map((internship) => (
+                      <TableRow 
+                        key={internship.id}
+                        className="hover:bg-muted/50 transition-colors"
                       >
-                        <Pencil className="h-4 w-4 text-secondary" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleDelete(internship.id)}
-                        className="h-8 w-8"
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => setSelectedInternship(internship)}
-                            className="h-8 w-8"
-                          >
-                            <Users className="h-4 w-4 text-primary" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px]">
-                          <DialogHeader>
-                            <DialogTitle className="text-lg">
-                              Applicants for {selectedInternship?.position}
-                            </DialogTitle>
-                          </DialogHeader>
-                          <div className="py-4">
-                            <h3 className="font-medium text-base mb-3">
-                              Current Applicants
-                            </h3>
-                            <ul className="space-y-2">
-                              {selectedInternship?.applicants?.map((applicant, index) => (
-                                <li
-                                  key={index}
-                                  className="flex items-center gap-2"
-                                >
-                                  <Users className="h-4 w-4 text-muted-foreground" />
-                                  {applicant}
-                                </li>
-                              ))}
-                            </ul>
+                        <TableCell className="font-medium">
+                          <div>{internship.company}</div>
+                          <div className="text-sm text-muted-foreground sm:hidden">
+                            {internship.position}
                           </div>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell">
+                          {internship.position}
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell max-w-[300px] truncate">
+                          {internship.description}
+                        </TableCell>
+                        <TableCell>
+                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
+                            {internship.applicants.length}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEdit(internship.id)}
+                              className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+                            >
+                              <Pencil className="h-4 w-4" />
+                              <span className="sr-only">Edit</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDelete(internship.id)}
+                              className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Delete</span>
+                            </Button>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => setSelectedInternship(internship)}
+                                  className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+                                >
+                                  <Users className="h-4 w-4" />
+                                  <span className="sr-only">View applicants</span>
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="sm:max-w-[425px]">
+                                <DialogHeader>
+                                  <DialogTitle className="text-xl font-semibold">
+                                    Applicants for {selectedInternship?.position}
+                                  </DialogTitle>
+                                </DialogHeader>
+                                <div className="py-4">
+                                  <h3 className="font-medium text-base mb-3">
+                                    Current Applicants
+                                  </h3>
+                                  {selectedInternship?.applicants.length === 0 ? (
+                                    <p className="text-muted-foreground text-sm">
+                                      No applicants yet
+                                    </p>
+                                  ) : (
+                                    <ul className="space-y-2">
+                                      {selectedInternship?.applicants?.map((applicant, index) => (
+                                        <li
+                                          key={index}
+                                          className="flex items-center gap-2 p-2 rounded-md hover:bg-muted/50"
+                                        >
+                                          <Users className="h-4 w-4 text-muted-foreground" />
+                                          {applicant}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {(!internships || internships.length === 0) && (
+                      <TableRow>
+                        <TableCell 
+                          colSpan={5} 
+                          className="h-24 text-center text-muted-foreground"
+                        >
+                          No internships found
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
+  
+  
 }

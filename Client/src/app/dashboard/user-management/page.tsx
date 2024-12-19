@@ -225,95 +225,105 @@ export default function Component() {
   }
 
   return (
-    <Card className="w-full">
-      <CardHeader className="space-y-1">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <CardTitle className="text-xl md:text-2xl lg:text-3xl text-primary">
-            User Management
-          </CardTitle>
-          <Dialog
-            open={isDialogOpen}
-            onOpenChange={(open) => {
-              setIsDialogOpen(open)
-              if (!open) resetForm()
-            }}
-          >
-            <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto" onClick={resetForm}>
-                <Plus className="mr-2 h-4 w-4" /> Add New User
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle className="text-lg text-secondary">
-                  {isEditMode ? "Edit User" : "Add New User"}
-                </DialogTitle>
-              </DialogHeader>
-              <UserForm
-                user={selectedUser}
-                isEditMode={isEditMode}
-                isLoading={
-                  createUserMutation.isPending || updateUserMutation.isPending
-                }
-                onSubmit={isEditMode ? handleUpdate : handleCreate}
-                onCancel={() => {
-                  setIsDialogOpen(false)
-                  resetForm()
-                }}
-              />
-            </DialogContent>
-          </Dialog>
-        </div>
-        <CardDescription className="text-sm md:text-base text-gray-400">
-          Manage admin and uploader accounts with role-based access control.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="rounded-md border overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Username</TableHead>
-                <TableHead className="hidden sm:table-cell">Email</TableHead>
-                <TableHead className="hidden md:table-cell">Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users?.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell>{user.username}</TableCell>
-                  <TableCell className="hidden sm:table-cell">
-                    {user.email}
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    {user.role}
-                  </TableCell>
-                  <TableCell>{user.active ? "Active" : "Inactive"}</TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => handleEdit(user.id)}
-                      className="mr-2"
+    <div className="flex flex-col min-h-screen">
+      <div className="container mx-auto">
+        <Card className="shadow-lg rounded-lg">
+          <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4">
+            <div>
+              <CardTitle className="text-2xl font-bold text-primary">User Management</CardTitle>
+              <CardDescription className="text-sm md:text-base text-gray-400">
+                Manage admin and uploader accounts with role-based access control.
+              </CardDescription>
+            </div>
+            <Dialog
+              open={isDialogOpen}
+              onOpenChange={(open) => {
+                setIsDialogOpen(open);
+                if (!open) resetForm();
+              }}
+            >
+              <DialogTrigger asChild>
+                <Button
+                  className="w-full sm:w-auto bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
+                  onClick={resetForm}
+                >
+                  <Plus className="mr-2 h-4 w-4" /> Add New User
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle className="text-lg text-secondary">
+                    {isEditMode ? "Edit User" : "Add New User"}
+                  </DialogTitle>
+                </DialogHeader>
+                <UserForm
+                  user={selectedUser}
+                  isEditMode={isEditMode}
+                  isLoading={
+                    createUserMutation.isPending || updateUserMutation.isPending
+                  }
+                  onSubmit={isEditMode ? handleUpdate : handleCreate}
+                  onCancel={() => {
+                    setIsDialogOpen(false);
+                    resetForm();
+                  }}
+                />
+              </DialogContent>
+            </Dialog>
+          </CardHeader>
+          <CardContent>
+            <div className="rounded-md border overflow-x-auto">
+              <Table className="w-full">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Username</TableHead>
+                    <TableHead className="hidden sm:table-cell">Email</TableHead>
+                    <TableHead className="hidden md:table-cell">Role</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users?.map((user) => (
+                    <TableRow
+                      key={user.id}
+                      className="hover:bg-gray-100 dark:hover:bg-gray-800"
                     >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => handleDelete(user.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
-  )
+                      <TableCell>{user.username}</TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        {user.email}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        {user.role}
+                      </TableCell>
+                      <TableCell>{user.active ? "Active" : "Inactive"}</TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleEdit(user.id)}
+                          className="mr-2 border-none"
+                        >
+                          <Pencil className="h-4 w-4 text-green-500" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleDelete(user.id)}
+                          className="border-none"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+  
 }

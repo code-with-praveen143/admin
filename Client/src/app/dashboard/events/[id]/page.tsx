@@ -3,7 +3,7 @@
 import React from "react";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, User, Mail, MapPin, Calendar } from 'lucide-react';
+import { Loader2, User, Mail, MapPin, Calendar, ArrowLeft } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { BASE_URL } from "@/app/utils/constants";
+import Link from "next/link";
 
 interface Address {
   street: string;
@@ -128,97 +129,162 @@ const EventDetails = () => {
   }
 
   return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl md:text-3xl lg:text-4xl text-primary">
-          {event?.title}
-        </CardTitle>
-        <CardDescription className="text-base md:text-lg text-gray-500">
-          {event?.collegeName}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-center gap-2">
-            <MapPin className="h-5 w-5 text-gray-500" />
-            <span>
-              {event?.address.street}, {event?.address.city}, {event?.address.state} {event?.address.zip}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-gray-500" />
-            <span>
-              {new Date(event?.time.startDate || "").toLocaleDateString()} {event?.time.startTime} - 
-              {new Date(event?.time.endDate || "").toLocaleDateString()} {event?.time.endTime}
-            </span>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Badge variant="secondary">{event?.modeOfEvent}</Badge>
-          <Badge variant="outline">Speaker: {event?.eventSpeaker}</Badge>
-        </div>
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">Registered Students</h2>
-            <Badge variant="secondary">
-              Total Students: {students?.length || 0}
-            </Badge>
-          </div>
-          <div className="rounded-md border overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[200px]">
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4" />
-                      <span className="sr-only">Name</span>
-                      Name
+    <div className="min-h-screen bg-background p-4 md:p-6 lg:p-8">
+      <div className="flex justify-end">
+        <Link href="/dashboard/events" passHref>
+          <span className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-md shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Events
+          </span>
+        </Link>
+      </div>
+      <div className="mx-auto max-w-7xl space-y-6">
+        {/* Event Details Card */}
+        <Card className="border-none shadow-none bg-transparent">
+          <CardHeader className="px-0 pb-6">
+            <div className="space-y-1">
+              <CardTitle className="text-3xl font-bold tracking-tight lg:text-4xl text-primary">
+                {event?.title}
+              </CardTitle>
+              <CardDescription className="text-lg text-muted-foreground">
+                {event?.collegeName}
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="px-0 space-y-8">
+            {/* Event Information Grid */}
+            <div className="grid gap-6 md:grid-cols-2">
+              <Card className="border bg-card">
+                <CardContent className="pt-6">
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <MapPin className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                          Location
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {event?.address.street}, {event?.address.city},{" "}
+                          {event?.address.state} {event?.address.zip}
+                        </p>
+                      </div>
                     </div>
-                  </TableHead>
-                  <TableHead>
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4" />
-                      <span className="sr-only">Email</span>
-                      Email
+                    <div className="flex items-start gap-3">
+                      <Calendar className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                          Date & Time
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {new Date(
+                            event?.time.startDate || ""
+                          ).toLocaleDateString()}{" "}
+                          {event?.time.startTime} -
+                          {new Date(
+                            event?.time.endDate || ""
+                          ).toLocaleDateString()}{" "}
+                          {event?.time.endTime}
+                        </p>
+                      </div>
                     </div>
-                  </TableHead>
-                  <TableHead>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border bg-card">
+                <CardContent className="pt-6">
+                  <div className="space-y-4">
                     <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      <span className="sr-only">Year</span>
-                      Year
+                      <Badge variant="secondary" className="capitalize">
+                        {event?.modeOfEvent}
+                      </Badge>
                     </div>
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {students?.map((student) => (
-                  <TableRow key={student._id}>
-                    <TableCell className="font-medium">{student.username}</TableCell>
-                    <TableCell>{student.email}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{student.yearOfJoining}</Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {(!students || students.length === 0) && (
-                  <TableRow>
-                    <TableCell
-                      colSpan={3}
-                      className="text-center text-muted-foreground py-8"
-                    >
-                      No students registered yet
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+                    <div className="flex items-start gap-3">
+                      <User className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                          Speaker
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {event?.eventSpeaker}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Registered Students Section */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold tracking-tight">
+                  Registered Students
+                </h2>
+                <Badge variant="secondary" className="h-7 rounded-md px-3">
+                  Total Students: {students?.length || 0}
+                </Badge>
+              </div>
+
+              <Card className="border">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead className="w-[200px]">
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4" />
+                            Name
+                          </div>
+                        </TableHead>
+                        <TableHead>
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-4 w-4" />
+                            Email
+                          </div>
+                        </TableHead>
+                        <TableHead className="w-[150px]">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            Year
+                          </div>
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {students?.map((student) => (
+                        <TableRow key={student._id}>
+                          <TableCell className="font-medium">
+                            {student.username}
+                          </TableCell>
+                          <TableCell>{student.email}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline">
+                              {student.yearOfJoining}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {(!students || students.length === 0) && (
+                        <TableRow>
+                          <TableCell
+                            colSpan={3}
+                            className="h-32 text-center text-muted-foreground"
+                          >
+                            No students registered yet
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </Card>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 };
 
 export default EventDetails;
-

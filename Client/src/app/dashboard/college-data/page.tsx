@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Edit, Trash } from "lucide-react";
+import { Edit, Loader2, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
@@ -116,100 +116,127 @@ export default function CollegeDataPage() {
   };
 
   // Loading and error states
-  if (isLoading) return <div>Loading...</div>;
-  if (error)
+  if (isLoading){
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="mr-2 h-8 w-8 text-green-600 animate-spin" />
+      </div>
+    );
+  }  if (error)
     return (
       <div>
         Error: {error instanceof Error ? error.message : "An error occurred"}
       </div>
     );
 
-  return (
-    <div className="container mx-auto px-4 py-6 space-y-8">
-      <Card>
-        <CardHeader className="p-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <CardTitle className="text-xl md:text-2xl lg:text-3xl text-primary">
-                College Data Management
-              </CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                Manage and organize college information
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Button
-                variant="secondary"
-                className="w-full sm:w-auto"
-                onClick={exportToCSV}
-              >
-                Export CSV
-              </Button>
-
-              <CollegeDataForm
-                onSubmit={handleSubmit}
-                initialData={editingCollege || undefined}
-                isEditMode={!!editingCollege}
-                regulationsData={regulationsData}
-              />
-            </div>
-          </div>
-        </CardHeader>
-
-        <CardContent className="p-6">
-          <div className="rounded-lg border bg-card">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead className="font-medium">College Name</TableHead>
-                    <TableHead className="font-medium">
-                      Regulatory Body
-                    </TableHead>
-                    <TableHead className="font-medium">Domain</TableHead>
-                    <TableHead className="font-medium">Programs</TableHead>
-                    <TableHead className="font-medium w-[100px]">
-                      Actions
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {collegeData?.map((college: CollegeData) => (
-                    <TableRow key={college._id}>
-                      <TableCell className="font-medium">
-                        {college.collegeName}
-                      </TableCell>
-                      <TableCell>{college.regulatoryBody}</TableCell>
-                      <TableCell>{college.domain}</TableCell>
-                      <TableCell>
-                        {college.programs?.map((p) => p.name).join(", ")}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEdit(college)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDelete(college._id!)}
-                          >
-                            <Trash className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto p-4 md:p-6 lg:p-8 max-w-7xl">
+          <Card className="shadow-lg">
+            <CardHeader className="p-4 md:p-6 space-y-4">
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                <div className="space-y-1.5">
+                  <CardTitle className="text-2xl text-green-600 md:text-3xl font-bold text-primary">
+                    College Data Management
+                  </CardTitle>
+                  <p className="text-sm md:text-base text-muted-foreground">
+                    Manage and organize college information
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                  <Button
+                    variant="secondary"
+                    className="w-full sm:w-auto order-2 sm:order-1"
+                    onClick={exportToCSV}
+                  >
+                    Export CSV
+                  </Button>
+                  <div className="order-1 sm:order-2 w-full sm:w-auto">
+                    <CollegeDataForm
+                      onSubmit={handleSubmit}
+                      initialData={editingCollege || undefined}
+                      isEditMode={!!editingCollege}
+                      regulationsData={regulationsData}
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+  
+            <CardContent className="p-4 md:p-6">
+              <div className="rounded-lg border bg-card">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/50">
+                        <TableHead className="font-semibold whitespace-nowrap px-4 py-3">
+                          College Name
+                        </TableHead>
+                        <TableHead className="font-semibold whitespace-nowrap px-4 py-3">
+                          Regulatory Body
+                        </TableHead>
+                        <TableHead className="font-semibold whitespace-nowrap px-4 py-3">
+                          Domain
+                        </TableHead>
+                        <TableHead className="font-semibold whitespace-nowrap px-4 py-3">
+                          Programs
+                        </TableHead>
+                        <TableHead className="font-semibold whitespace-nowrap px-4 py-3 w-[100px]">
+                          Actions
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {collegeData?.map((college: CollegeData) => (
+                        <TableRow 
+                          key={college._id}
+                          className="hover:bg-muted/50 transition-colors"
+                        >
+                          <TableCell className="font-medium px-4 py-3">
+                            {college.collegeName}
+                          </TableCell>
+                          <TableCell className="px-4 py-3">
+                            {college.regulatoryBody}
+                          </TableCell>
+                          <TableCell className="px-4 py-3">
+                            {college.domain}
+                          </TableCell>
+                          <TableCell className="px-4 py-3">
+                            <div className="max-w-[300px] truncate">
+                              {college.programs?.map((p) => p.name).join(", ")}
+                            </div>
+                          </TableCell>
+                          <TableCell className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEdit(college)}
+                                className="hover:bg-primary/10"
+                              >
+                                <Edit className="h-4 w-4" />
+                                <span className="sr-only">Edit</span>
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDelete(college._id!)}
+                                className="hover:bg-destructive/10"
+                              >
+                                <Trash className="h-4 w-4 text-destructive" />
+                                <span className="sr-only">Delete</span>
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
 }

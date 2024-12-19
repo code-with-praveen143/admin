@@ -241,212 +241,252 @@ export default function PDFUploadPage() {
   }
 
   return (
-    <Card className="w-full max-w-[95vw] mx-auto">
-      <CardHeader className="space-y-2">
-        <CardTitle className="text-xl md:text-2xl lg:text-3xl text-primary">
-          PDF Upload Manager
-        </CardTitle>
-        <CardDescription className="text-sm md:text-base text-muted-foreground">
-          Organize and manage PDF uploads across different academic years,
-          courses, and subjects
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex justify-between items-center flex-wrap gap-4">
+    <div className="min-h-screen bg-background p-4 md:p-6 lg:p-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+        {/* Header Section */}
+        <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-bold tracking-tight md:text-3xl text-primary">PDF Upload Manager</h2>
+            <p className="text-sm text-muted-foreground md:text-base">
+              Organize and manage PDF uploads across different academic years, courses, and subjects
+            </p>
+          </div>
           <Button
-            className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground"
             onClick={handleNew}
+            className="w-full md:w-auto bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             <FileUp className="mr-2 h-4 w-4" />
             <span className="hidden sm:inline">Upload New PDF</span>
             <span className="sm:hidden">Upload</span>
           </Button>
         </div>
-
+  
+        {/* Main Content Card */}
+        <div className="rounded-lg border bg-card">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-[120px] font-semibold">Year</TableHead>
+                  <TableHead className="w-[140px] font-semibold">Semester</TableHead>
+                  <TableHead className="w-[120px] hidden sm:table-cell font-semibold">Regulation</TableHead>
+                  <TableHead className="hidden md:table-cell font-semibold">Course</TableHead>
+                  <TableHead className="font-semibold">Subject</TableHead>
+                  <TableHead className="w-[100px] hidden lg:table-cell font-semibold">Files</TableHead>
+                  <TableHead className="w-[140px] text-center font-semibold">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pdfUploads?.map((upload: any) => (
+                  <TableRow key={upload.id} className="hover:bg-muted/50">
+                    <TableCell className="font-medium">{upload.academicYear.year}</TableCell>
+                    <TableCell>{upload.academicYear.semester}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{upload.regulation}</TableCell>
+                    <TableCell className="hidden md:table-cell max-w-[200px] truncate">
+                      {upload.course}
+                    </TableCell>
+                    <TableCell className="max-w-[200px] truncate">{upload.subject}</TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      {upload.files.length} file(s)
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEdit(upload.id)}
+                          className="h-8 w-8 text-muted-foreground hover:text-primary"
+                        >
+                          <Pencil className="h-4 w-4 text-green-500" />
+                          <span className="sr-only text-green-500">Edit</span>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteConfirmation(upload.id)}
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                          <span className="sr-only text-red-500">Delete</span>
+                        </Button>
+                        {upload.files.map((file: any, index: number) => (
+                          <Button
+                            key={index}
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDownload(upload.id, index)}
+                            disabled={isDownloading}
+                            className="h-8 w-8 text-muted-foreground hover:text-primary"
+                          >
+                            <Download className="h-4 w-4 text-blue-500" />
+                            <span className="sr-only text-blue-500">Download file {index + 1}</span>
+                          </Button>
+                        ))}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {(!pdfUploads || pdfUploads.length === 0) && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="h-24 text-center">
+                      No PDFs uploaded yet
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+  
+        {/* Upload/Edit Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogContent className="sm:max-w-[425px] overflow-y-auto max-h-[90vh]">
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold text-primary">
+              <DialogTitle className="text-xl font-semibold">
                 {editingId ? "Edit PDF Upload" : "Upload New PDF"}
               </DialogTitle>
-              <DialogDescription className="text-muted-foreground">
-                {editingId
-                  ? "Modify the existing PDF details"
-                  : "Add new PDFs to the collection"}
+              <DialogDescription>
+                {editingId ? "Modify the existing PDF details" : "Add new PDFs to the collection"}
               </DialogDescription>
             </DialogHeader>
-
+  
             <div className="grid gap-6 py-4">
-              {/* Academic Year */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="year"
-                  className="text-right text-sm font-medium"
-                >
-                  Year
-                </Label>
-                <Select
-                  value={newUpload.academicYear?.year || ""}
-                  onValueChange={(value) =>
-                    setNewUpload({
-                      ...newUpload,
-                      academicYear: { ...newUpload.academicYear, year: value },
-                    })
-                  }
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {years?.map((year) => (
-                      <SelectItem key={year} value={year}>
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Year and Semester Group */}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="year">Academic Year</Label>
+                    <Select
+                      value={newUpload.academicYear?.year || ""}
+                      onValueChange={(value) =>
+                        setNewUpload({
+                          ...newUpload,
+                          academicYear: { ...newUpload.academicYear, year: value },
+                        })
+                      }
+                    >
+                      <SelectTrigger id="year">
+                        <SelectValue placeholder="Select year" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {years?.map((year) => (
+                          <SelectItem key={year} value={year}>
+                            {year}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+  
+                  <div className="space-y-2">
+                    <Label htmlFor="semester">Semester</Label>
+                    <Select
+                      value={newUpload.academicYear?.semester || ""}
+                      onValueChange={(value) =>
+                        setNewUpload({
+                          ...newUpload,
+                          academicYear: { ...newUpload.academicYear, semester: value },
+                        })
+                      }
+                    >
+                      <SelectTrigger id="semester">
+                        <SelectValue placeholder="Select semester" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {semesters?.map((semester) => (
+                          <SelectItem key={semester} value={semester}>
+                            {semester}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+  
+                {/* Course and Subject Group */}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="regulation">Regulation</Label>
+                    <Select
+                      value={newUpload.regulation || ""}
+                      onValueChange={(value) =>
+                        setNewUpload({ ...newUpload, regulation: value })
+                      }
+                    >
+                      <SelectTrigger id="regulation">
+                        <SelectValue placeholder="Select regulation" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {regulations?.map((regulation: any) => (
+                          <SelectItem
+                            key={regulation._id}
+                            value={regulation.regulation_type}
+                          >
+                            {regulation.regulation_type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+  
+                  <div className="space-y-2">
+                    <Label htmlFor="course">Course</Label>
+                    <Input
+                      id="course"
+                      value={newUpload.course || ""}
+                      onChange={(e) =>
+                        setNewUpload({ ...newUpload, course: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
               </div>
-
-              {/* Semester */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="semester"
-                  className="text-right text-sm font-medium"
-                >
-                  Semester
-                </Label>
-                <Select
-                  value={newUpload.academicYear?.semester || ""}
-                  onValueChange={(value) =>
-                    setNewUpload({
-                      ...newUpload,
-                      academicYear: {
-                        ...newUpload.academicYear,
-                        semester: value,
-                      },
-                    })
-                  }
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select semester" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {semesters?.map((semester) => (
-                      <SelectItem key={semester} value={semester}>
-                        {semester}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+  
+              {/* Subject and Units */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="subject">Subject</Label>
+                  <Input
+                    id="subject"
+                    value={newUpload.subject || ""}
+                    onChange={(e) =>
+                      setNewUpload({ ...newUpload, subject: e.target.value })
+                    }
+                  />
+                </div>
+  
+                <div className="space-y-2">
+                  <Label htmlFor="units">Units</Label>
+                  <Select
+                    value={newUpload.units || ""}
+                    onValueChange={(value) =>
+                      setNewUpload({ ...newUpload, units: value })
+                    }
+                  >
+                    <SelectTrigger id="units">
+                      <SelectValue placeholder="Select Unit" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1st unit">Unit 1</SelectItem>
+                      <SelectItem value="2nd unit">Unit 2</SelectItem>
+                      <SelectItem value="3rd unit">Unit 3</SelectItem>
+                      <SelectItem value="4th unit">Unit 4</SelectItem>
+                      <SelectItem value="5th unit">Unit 5</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-
-              {/* Regulation */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="regulation"
-                  className="text-right text-sm font-medium"
-                >
-                  Regulation
-                </Label>
-                <Select
-                  value={newUpload.regulation || ""}
-                  onValueChange={(value) =>
-                    setNewUpload({ ...newUpload, regulation: value })
-                  }
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select regulation" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {regulations?.map((regulation: any) => (
-                      <SelectItem
-                        key={regulation._id}
-                        value={regulation.regulation_type}
-                      >
-                        {regulation.regulation_type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Course */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="course"
-                  className="text-right text-sm font-medium"
-                >
-                  Course
-                </Label>
-                <Input
-                  id="course"
-                  value={newUpload.course || ""}
-                  onChange={(e) =>
-                    setNewUpload({ ...newUpload, course: e.target.value })
-                  }
-                  className="col-span-3"
-                />
-              </div>
-
-              {/* Subject */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="subject"
-                  className="text-right text-sm font-medium"
-                >
-                  Subject
-                </Label>
-                <Input
-                  id="subject"
-                  value={newUpload.subject || ""}
-                  onChange={(e) =>
-                    setNewUpload({ ...newUpload, subject: e.target.value })
-                  }
-                  className="col-span-3"
-                />
-              </div>
-
-              {/* Units */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="units"
-                  className="text-right text-sm font-medium"
-                >
-                  Units
-                </Label>
-                <Select
-                  value={newUpload.units || ""}
-                  onValueChange={(value) =>
-                    setNewUpload({ ...newUpload, units: value })
-                  }
-                >
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select Unit" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1st unit">Unit 1</SelectItem>
-                    <SelectItem value="2nd unit">Unit 2</SelectItem>
-                    <SelectItem value="3rd unit">Unit 3</SelectItem>
-                    <SelectItem value="4th unit">Unit 4</SelectItem>
-                    <SelectItem value="5th unit">Unit 5</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Multiple PDF Files Upload */}
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="files"
-                  className="text-right text-sm font-medium"
-                >
-                  PDF Files
-                </Label>
-                <div className="col-span-3 space-y-2">
+  
+              {/* File Upload Section */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="files">PDF Files</Label>
                   <Input
                     id="files"
                     type="file"
                     accept=".pdf"
                     multiple
+                    className="cursor-pointer"
                     onChange={(e) => {
                       const newFiles = Array.from(e.target.files || []);
                       const invalidFiles = newFiles.filter(
@@ -457,42 +497,24 @@ export default function PDFUploadPage() {
                         e.target.value = "";
                         return;
                       }
-                      setSelectedFiles((prevFiles) => [
-                        ...prevFiles,
-                        ...newFiles,
-                      ]);
+                      setSelectedFiles((prevFiles) => [...prevFiles, ...newFiles]);
                       e.target.value = "";
                     }}
                   />
-
-                  {/* Display Selected Files */}
-                  {selectedFiles.length > 0 && (
-                    <div className="text-sm text-muted-foreground">
-                      <p>Selected files:</p>
-                      <ul className="list-disc pl-5 mt-2 space-y-2">
-                        {editingId &&
-                          pdfUploads
-                            ?.find((pdf) => pdf.id === editingId)
-                            ?.files.map((file, index) => (
-                              <li
-                                key={`existing-${index}`}
-                                className="flex items-center justify-between"
-                              >
-                                <span>
-                                  {file.fileName ||
-                                    `Existing File ${index + 1}`}
-                                </span>
-                                <span className="text-muted-foreground">
-                                  (Existing)
-                                </span>
-                              </li>
-                            ))}
+                </div>
+  
+                {/* Selected Files List */}
+                {selectedFiles.length > 0 && (
+                  <div className="space-y-2">
+                    <Label>Selected Files</Label>
+                    <div className="rounded-lg border bg-muted/50 p-4">
+                      <ul className="space-y-2">
                         {selectedFiles.map((file, index) => (
                           <li
                             key={`new-${index}`}
-                            className="flex items-center justify-between"
+                            className="flex items-center justify-between text-sm"
                           >
-                            <span>{file.name}</span>
+                            <span className="truncate mr-2">{file.name}</span>
                             <Button
                               type="button"
                               variant="ghost"
@@ -502,72 +524,62 @@ export default function PDFUploadPage() {
                                   prevFiles.filter((_, i) => i !== index)
                                 )
                               }
-                              className="text-red-500"
+                              className="text-destructive hover:text-destructive/90"
                             >
-                              Remove
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">Remove {file.name}</span>
                             </Button>
                           </li>
                         ))}
                       </ul>
-                      {selectedFiles.length > 0 && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSelectedFiles([])}
-                          className="mt-2 text-red-500"
-                        >
-                          Clear New Files
-                        </Button>
-                      )}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
-
-              {/* Submit Button */}
-              <DialogFooter>
-                <Button
-                  onClick={editingId ? handleUpdate : handleAdd}
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-                  disabled={
-                    createPdfMutation.isPending ||
-                    updatePdfMutation.isPending ||
-                    selectedFiles.length === 0
-                  }
-                >
-                  {createPdfMutation.isPending ||
-                  updatePdfMutation.isPending ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Processing...
-                    </div>
-                  ) : editingId ? (
-                    `Update PDF${
-                      selectedFiles.length > 0
-                        ? ` and Upload ${selectedFiles.length} New File${
-                            selectedFiles.length !== 1 ? "s" : ""
-                          }`
-                        : ""
-                    }`
-                  ) : (
-                    `Upload ${selectedFiles.length} PDF${
-                      selectedFiles.length !== 1 ? "s" : ""
-                    }`
-                  )}
-                </Button>
-              </DialogFooter>
             </div>
+  
+            <DialogFooter>
+              <Button
+                onClick={editingId ? handleUpdate : handleAdd}
+                className="w-full sm:w-auto"
+                disabled={
+                  createPdfMutation.isPending ||
+                  updatePdfMutation.isPending ||
+                  (!editingId && selectedFiles.length === 0)
+                }
+              >
+                {createPdfMutation.isPending || updatePdfMutation.isPending ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Processing...</span>
+                  </div>
+                ) : (
+                  <span>
+                    {editingId
+                      ? `Update PDF${
+                          selectedFiles.length > 0
+                            ? ` and Upload ${selectedFiles.length} New File${
+                                selectedFiles.length !== 1 ? "s" : ""
+                              }`
+                            : ""
+                        }`
+                      : `Upload ${selectedFiles.length} PDF${
+                          selectedFiles.length !== 1 ? "s" : ""
+                        }`}
+                  </span>
+                )}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
-
+  
+        {/* Delete Confirmation Dialog */}
         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Confirm Deletion</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete this PDF? This action cannot be
-                undone.
+                Are you sure you want to delete this PDF? This action cannot be undone.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -582,85 +594,26 @@ export default function PDFUploadPage() {
                 onClick={handleDelete}
                 disabled={deletePdfMutation.isPending}
               >
-                {deletePdfMutation.isPending ? "Deleting..." : "Delete"}
+                {deletePdfMutation.isPending ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Deleting...</span>
+                  </div>
+                ) : (
+                  "Delete"
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
-
-        <div className="rounded-md border border-border">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="font-semibold">Year</TableHead>
-                  <TableHead className="font-semibold">Semester</TableHead>
-                  <TableHead className="font-semibold hidden sm:table-cell">
-                    Regulation
-                  </TableHead>
-                  <TableHead className="font-semibold hidden md:table-cell">
-                    Course
-                  </TableHead>
-                  <TableHead className="font-semibold">Subject</TableHead>
-                  <TableHead className="font-semibold hidden lg:table-cell">
-                    Files
-                  </TableHead>
-                  <TableHead className="text-right font-semibold">
-                    Actions
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {pdfUploads?.map((upload: any) => (
-                  <TableRow key={upload.id}>
-                    <TableCell>{upload.academicYear.year}</TableCell>
-                    <TableCell>
-                      {upload.academicYear.semester.join(", ")}
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      {upload.regulation}
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      {upload.course}
-                    </TableCell>
-                    <TableCell>{upload.subject}</TableCell>
-                    <TableCell className="hidden lg:table-cell">
-                      {upload.files.length} file(s)
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        className="text-green-500"
-                        onClick={() => handleEdit(upload.id)}
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        className="text-red-500"
-                        onClick={() => handleDeleteConfirmation(upload.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                      {upload.files.map((file: any, index: any) => (
-                        <Button
-                          key={index}
-                          variant="ghost"
-                          className="text-blue-500"
-                          onClick={() => handleDownload(upload.id, index)}
-                          disabled={isDownloading}
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      ))}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+  
+        {/* Loading State */}
+        {isLoading && (
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin" />
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        )}
+      </div>
+    </div>
   );
 }
