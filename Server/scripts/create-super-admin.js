@@ -9,18 +9,12 @@ require('dotenv').config();
 async function connectDB() {
     try {
         // Add database name to URI if not present
-        let uri = process.env.MONGODB_URI;
-        if (!uri.includes('mongodb.net/')) {
-            uri = uri.replace('mongodb.net/', 'mongodb.net/adminBoard?');
-        }
-
-        console.log('Attempting to connect to MongoDB...');
+        const uri = "mongodb+srv://hello:Helloworld@cluster0.t6ub7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+        
         
         await mongoose.connect(uri, {
-            serverSelectionTimeoutMS: 5000,
+            serverSelectionTimeoutMS: 50000,
             socketTimeoutMS: 45000,
-            useNewUrlParser: true,
-            useUnifiedTopology: true
         });
 
         console.log('MongoDB connected successfully');
@@ -45,11 +39,11 @@ async function createSuperAdmin() {
         }
 
         console.log('Creating new SuperAdmin...');
-        const hashedPassword = await bcrypt.hash(process.env.SUPER_ADMIN_PASSWORD, 12);
+        const hashedPassword = await bcrypt.hash("password", 12);
         
         const superAdmin = new User({
-            username: process.env.SUPER_ADMIN_USERNAME,
-            email: process.env.SUPER_ADMIN_EMAIL,
+            username: "manohar",
+            email: "manohar@symfor.com",
             password: hashedPassword,
             role: 'SuperAdmin',
             isVerified: true,
@@ -82,6 +76,7 @@ async function createSuperAdmin() {
         process.exit(0);
     }
 }
+
 
 // Run the script with better error handling
 createSuperAdmin().catch(error => {

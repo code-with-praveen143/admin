@@ -20,7 +20,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       </header>
 
       <div className="flex-1 flex flex-col lg:flex-row">
-        {userRole === "Admin" && (
+        {userRole === "SuperAdmin" && (
           <>
             {/* Mobile sidebar */}
             <aside 

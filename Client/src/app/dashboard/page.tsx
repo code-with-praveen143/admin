@@ -60,7 +60,7 @@ export default function Home() {
     <Card className="w-full">
       <CardHeader className="space-y-1">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <CardTitle className="text-xl md:text-2xl lg:text-3xl text-primary">
+          <CardTitle className="text-xl md:text-2xl lg:text-3xl text-primary font-bold">
             Dashboard Overview
           </CardTitle>
         </div>

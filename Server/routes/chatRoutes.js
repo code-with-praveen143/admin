@@ -20,8 +20,6 @@ const router = express.Router();
  *         description: Chat session successfully started
  *         content:
  *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ChatResponse'
  *       400:
  *         description: Bad request
  */
@@ -51,8 +49,6 @@ router.post("/start", async (req, res) => {
  *         description: Question successfully answered
  *         content:
  *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ChatResponse'
  *       400:
  *         description: Bad request
  */
@@ -89,8 +85,6 @@ router.post("/ask", async (req, res) => {
  *         description: Successfully retrieved chat history
  *         content:
  *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/ChatHistoryResponse'
  *       400:
  *         description: Bad request
  *       404:

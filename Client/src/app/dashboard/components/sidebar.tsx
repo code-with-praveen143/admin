@@ -100,10 +100,10 @@ export function Sidebar() {
 
   // Filter sidebarNavItems based on user role
   const filteredSidebarNavItems = sidebarNavItems.filter((item) => {
-    // if (role === "Student") {
-    //   return item.title === "ChatBot"; // Only show ChatBot for Student role
-    // }
-    if (role === "Admin") {
+    if (role === "Student") {
+      return item.title === "ChatBot"; // Only show ChatBot for Student role
+    }
+    if (role === "SuperAdmin") {
       return item.title !== "ChatBot"; // Show all routes except ChatBot for Admin
     }
     return false; // No items displayed for other roles

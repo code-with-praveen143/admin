@@ -93,7 +93,7 @@ export default function NotificationsPage() {
      >
         <CardHeader className="space-y-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-            <CardTitle className="text-2xl font-semibold  ">
+            <CardTitle className="text-2xl font-bold text-primary ">
               Notifications
               <Badge variant="secondary" className="ml-2 bg-primary/10 text-primary">
                 {notifications?.length} New

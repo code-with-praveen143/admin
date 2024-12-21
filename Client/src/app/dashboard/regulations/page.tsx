@@ -218,7 +218,7 @@ export default function Component() {
                           onClick={() => handleEdit(regulation)}
                           className="mr-2 border-gray-300 hover:bg-gray-200 dark:border-gray-700 dark:hover:bg-gray-700"
                         >
-                          <Pencil className="h-4 w-4" />
+                          <Pencil className="h-4 w-4 text-green-500" />
                         </Button>
                         <Button
                           variant="outline"
@@ -226,7 +226,7 @@ export default function Component() {
                           onClick={() => handleDelete(regulation._id)}
                           className="border-gray-300 hover:bg-gray-200 dark:border-gray-700 dark:hover:bg-gray-700"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-4 w-4 text-red-500" />
                         </Button>
                       </TableCell>
                     </TableRow>

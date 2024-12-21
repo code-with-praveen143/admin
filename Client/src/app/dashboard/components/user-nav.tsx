@@ -188,7 +188,7 @@ export function Navbar() {
     if (role === "Student") {
       return item.title === "ChatBot"; // Show only ChatBot for Student
     }
-    if (role === "Admin") {
+    if (role === "SuperAdmin") {
       return item.title !== "ChatBot"; // Show all except ChatBot for Admin
     }
     return false; // Show nothing for other roles

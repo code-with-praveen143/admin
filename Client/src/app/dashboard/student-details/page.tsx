@@ -115,7 +115,7 @@ export default function StudentDetailsPage() {
       )}
       <Card className="w-full">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-xl md:text-2xl lg:text-3xl text-primary">
+          <CardTitle className="text-xl md:text-2xl font-bold lg:text-3xl text-primary">
             Student Details
           </CardTitle>
           <CardDescription className="text-sm md:text-base text-gray-400">
