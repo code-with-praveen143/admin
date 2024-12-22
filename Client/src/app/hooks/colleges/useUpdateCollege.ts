@@ -7,6 +7,7 @@ async function updateCollege({ id, ...updateData }: { id: string } & Partial<Col
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
+      "Authorization": `Bearer ${sessionStorage.getItem("auth_token")}`
     },
     body: JSON.stringify(updateData),
   });
