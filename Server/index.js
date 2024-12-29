@@ -1,3 +1,17 @@
+const express = require("express");
+const path = require("path");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const { swaggerUi, swaggerSpecs } = require("./swagger/swagger");
+const connectDB = require("./config/db"); // MongoDB connection
+const logger = require("./config/logger"); // Logger
+const { requestLogger, ipLogger } = require("./middleware/requestLogger"); // Middleware
+const http = require("http");
+const { Server } = require("socket.io");
+const dotenv = require("dotenv");
+
+dotenv.config();
+
 const collegeRoutes = require("./routes/collegeRoutes");
 const eventsRoutes = require("./routes/eventsRoutes");
 const pdfRoutes = require("./routes/pdfRoutes");
@@ -9,26 +23,20 @@ const userRoutes = require("./routes/usersRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const previousPaperRoutes = require("./routes/previousPaperRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
-const express = require("express");
-const path = require("path");
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const { swaggerUi, swaggerSpecs } = require("./swagger/swagger");
-const connectDB = require("./config/db"); // Import MongoDB connection
-const logger = require("./config/logger"); // Import logger
-const { requestLogger, ipLogger } = require("./middleware/requestLogger"); // Import request logger middleware
-const http = require("http");
-const { Server } = require("socket.io");
-const chatController = require("./controllers/chatController");
 const feedbackRoutes = require("./routes/feedbackRoute");
-require("dotenv").config();
+
+const chatController = require("./controllers/chatController");
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 const server = http.createServer(app);
+
 const io = new Server(server, {
   cors: {
-    origin: "*", // Adjust based on your frontend
+    origin: [
+      "http://localhost:3000", // Localhost frontend
+      "https://campusify-admin-app.vercel.app", // Vercel deployed frontend
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -38,18 +46,22 @@ const io = new Server(server, {
 // Middleware
 app.use(
   cors({
-    origin: "https://campusify-admin-app.vercel.app", // Adjust based on your frontend
+    origin: [
+      "http://localhost:3000", // Localhost frontend
+      "https://campusify-admin-app.vercel.app", // Vercel deployed frontend
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
+app.options("*", cors()); // Enable preflight requests for all routes
+
 app.use(express.urlencoded({ extended: false }));
-app.options("https://campusify-admin-app.vercel.app", cors());
 app.use(express.json());
 connectDB();
 
-// Use the request logger middleware
+// Request logging middleware
 app.use(requestLogger);
 app.use(ipLogger);
 
@@ -71,12 +83,10 @@ app.use("/api/chat", chatRoutes);
 app.use("/api", notificationRoutes);
 app.use("/api/feedback", feedbackRoutes);
 
-
-// Socket.IO Integration
+// Socket.IO integration
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
 
-  // Handle starting a chat session
   socket.on("start-chat", async (data) => {
     try {
       const { year, semester, subject, unit } = data;
@@ -92,7 +102,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Handle user questions
   socket.on("ask-question", async (data) => {
     try {
       const { chatId, question } = data;
@@ -108,7 +117,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Fetch chat history
   socket.on("get-chat-history", async (data) => {
     try {
       const { chatId } = data;
@@ -124,7 +132,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  // Handle disconnection
   socket.on("disconnect", () => {
     console.log(`User disconnected: ${socket.id}`);
   });
