@@ -38,14 +38,14 @@ const io = new Server(server, {
 // Middleware
 app.use(
   cors({
-    origin: "*", // Adjust based on your frontend
+    origin: "https://campusify-admin-app.vercel.app", // Adjust based on your frontend
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
 app.use(express.urlencoded({ extended: false }));
-app.options("*", cors());
+app.options("https://campusify-admin-app.vercel.app", cors());
 app.use(express.json());
 connectDB();
 
