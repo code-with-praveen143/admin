@@ -19,7 +19,7 @@ import { CollegeData, Regulation, Program } from "@/app/@types/college";
 const programOptions = [
   {
     name: "B.Tech",
-    specializations: ["CSE", "ECE", "EEE", "CSM", "Civil", "Mechanical"],
+    specializations: ["CSE", "ECE", "EEE", "CSM", "CIVIL", "MECH"],
     years: [1, 2, 3, 4],
     regulations: [
       {

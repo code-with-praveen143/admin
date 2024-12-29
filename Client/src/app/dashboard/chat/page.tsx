@@ -30,7 +30,9 @@ export default function Chatbot() {
   const [chatId, setChatId] = useState("");
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
-  const [regulation, setRegulation] = useState("");
+  const [regulation, setRegulation] = useState(
+    sessionStorage.getItem("regulation")
+  );
   const [darkMode, setDarkMode] = useState(false);
   const [userId, setUserId] = useState("");
   const [chatHistory, setChatHistory] = useState<any[]>([]);
@@ -80,7 +82,6 @@ export default function Chatbot() {
           messages: chat.messages,
           title: chat.messages[0]?.content || "Untitled Chat", // Use first message content as title
         }));
-
       }
     } catch (error) {
       console.error("Error fetching chat history:", error);
@@ -293,7 +294,7 @@ export default function Chatbot() {
           </Button>
         </div>
       </header>
-  
+
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <div
@@ -310,7 +311,7 @@ export default function Chatbot() {
           >
             <Plus className="mr-2 h-4 w-4" /> New Chat
           </Button>
-  
+
           <ScrollArea className="flex-grow">
             {categorizeChats(chatHistory).map(({ title, chats }) => (
               <div key={title}>
@@ -341,7 +342,7 @@ export default function Chatbot() {
             ))}
           </ScrollArea>
         </div>
-  
+
         {/* Main Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* Chat Area */}
@@ -418,18 +419,6 @@ export default function Chatbot() {
                       ))}
                   </SelectContent>
                 </Select>
-                <Select value={regulation} onValueChange={setRegulation}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Regulation" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {regulations?.map((reg: any) => (
-                      <SelectItem key={reg._id} value={reg.regulation_type}>
-                        {reg.regulation_type}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
                 <Button
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                   onClick={handleStartChat}
@@ -487,29 +476,35 @@ export default function Chatbot() {
             )}
             {/* Input Area */}
             {step === "chat" && (
-              <form onSubmit={handleAskQuestion} className="border-t p-4">
-                <div className="flex items-center space-x-2">
-                  <Input
-                    value={question}
-                    onChange={(e) => setQuestion(e.target.value)}
-                    placeholder="Type your message..."
-                    className="flex-grow"
-                  />
-                  <Button
-                    type="submit"
-                    size="icon"
-                    disabled={loading || !question.trim()}
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
+              <div className="sticky bottom-0 p-6 border-t border-gray-200 dark:border-gray-700">
+              <form
+                onSubmit={handleAskQuestion}
+                className="flex items-center justify-center space-x-4 max-w-full mx-auto"
+              >
+                <Input
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  placeholder="Type your message..."
+                  className="flex-grow  min-h-[40px] text-lg px-4 py-2 rounded-lg"
+                />
+                <Button
+                  type="submit"
+                  size="icon"
+                  disabled={loading || !question.trim()}
+                  className="flex-shrink-0 h-[40px] w-[40px]"
+                >
+                  {loading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Send className="h-5 w-5" />
+                  )}
+                </Button>
               </form>
+            </div>
             )}
           </ScrollArea>
         </div>
       </div>
     </div>
   );
-  
-  
 }

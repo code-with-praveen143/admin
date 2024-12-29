@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       select: false,
     },
-    referral_code: {
+      referral_code: {
       type: String,
       unique: true, // Ensure the referral code is unique
     },

@@ -21,8 +21,6 @@ import CollegeDataForm from "@/app/components/Forms/collegeForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CollegeData, CollegeExportData } from "@/app/@types/college";
 
-// ... (keep all the interfaces as they were)
-
 export default function CollegeDataPage() {
   // Hooks
   const { data: collegeData, isLoading, error } = useGetColleges();

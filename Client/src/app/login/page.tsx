@@ -70,7 +70,8 @@ function LoginPageContent() {
       sessionStorage.setItem("auth_token", response.token);
       sessionStorage.setItem("username", response.user.username);
       sessionStorage.setItem("email", response.user.email);
-      sessionStorage.setItem("user_id", response.user.id);
+      sessionStorage.setItem("user_id", response.user._id);
+      sessionStorage.setItem("regulation", response.user.regulation);
       sessionStorage.setItem("role", response.user.role);
       // Redirect to dashboard or home page
       if(response.user.role === "Student"){

@@ -2,8 +2,8 @@ const User = require("../models/User");
 const { ObjectId } = require("mongoose").Types;
 const PdfUpload = require("../models/PdfUpload");
 
-exports.getUsers = async (req, res) => {
-  try {
+exports.getUsers = async(req, res) => {
+ try {
     // Fetch users whose role is 'Admin' or 'Uploader'
     const users = await User.find({ role: { $in: ["Admin", "Uploader","Student"] } });
     // Check if any users are found
