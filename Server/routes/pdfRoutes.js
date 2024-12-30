@@ -301,7 +301,7 @@ router.delete(
 
 /**
  * @swagger
- * /api/pdfs/download/{id}/{fileIndex}:
+ * /api/pdfs/download/{id}/{fileName}:
  *   get:
  *     summary: Download a specific PDF file
  *     tags: [PDFs]
@@ -312,10 +312,10 @@ router.delete(
  *         schema:
  *           type: number
  *       - in: path
- *         name: fileIndex
+ *         name: fileName
  *         required: true
  *         schema:
- *           type: number
+ *           type: string
  *     responses:
  *       200:
  *         description: PDF file
@@ -324,9 +324,9 @@ router.delete(
  *             schema:
  *               type: string
  *               format: binary
- */
-router.get(
-  "/download/:id/:fileIndex",
+  */
+  router.get(
+  "/download/:id/:fileName",
   authMiddleware,
   // authorizeRoles("Admin", "Uploader", "Student"),
   pdfController.downloadPdf

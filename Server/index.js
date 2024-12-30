@@ -41,6 +41,7 @@ const io = new Server(server, {
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   },
+  maxHttpBufferSize: 1e8, // 100MB
 });
 
 // Middleware
@@ -57,8 +58,9 @@ app.use(
 );
 app.options("*", cors()); // Enable preflight requests for all routes
 
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
+app.use(express.json({ limit: "100mb" })); // Adjust the size as needed
+app.use(express.urlencoded({ extended: false, limit: "100mb" }));
+
 connectDB();
 
 // Request logging middleware

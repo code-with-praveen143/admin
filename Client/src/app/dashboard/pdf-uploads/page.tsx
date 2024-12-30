@@ -222,15 +222,16 @@ export default function PDFUploadPage() {
     }
   };
 
-  const handleDownload = async (id: number, fileIndex: number) => {
+  const handleDownload = async (id: any, fileName: any) => {
     try {
-      await downloadPdf(id, fileIndex);
+      await downloadPdf(id, fileName);
       toast.success("PDF downloaded successfully");
-    } catch (error: any) {
+    } catch (error:any) {
       console.error("Error downloading PDF:", error);
       toast.error(error.message || "Failed to download PDF");
     }
   };
+  
 
   if (isLoading) {
     return (
@@ -246,9 +247,12 @@ export default function PDFUploadPage() {
         {/* Header Section */}
         <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:items-center md:justify-between">
           <div className="space-y-1">
-            <h2 className="text-2xl font-bold tracking-tight md:text-3xl text-primary">PDF Upload Manager</h2>
+            <h2 className="text-2xl font-bold tracking-tight md:text-3xl text-primary">
+              PDF Upload Manager
+            </h2>
             <p className="text-sm text-muted-foreground md:text-base">
-              Organize and manage PDF uploads across different academic years, courses, and subjects
+              Organize and manage PDF uploads across different academic years,
+              courses, and subjects
             </p>
           </div>
           <Button
@@ -260,32 +264,50 @@ export default function PDFUploadPage() {
             <span className="sm:hidden">Upload</span>
           </Button>
         </div>
-  
+
         {/* Main Content Card */}
         <div className="rounded-lg border bg-card">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
-                  <TableHead className="w-[120px] font-semibold">Year</TableHead>
-                  <TableHead className="w-[140px] font-semibold">Semester</TableHead>
-                  <TableHead className="w-[120px] hidden sm:table-cell font-semibold">Regulation</TableHead>
-                  <TableHead className="hidden md:table-cell font-semibold">Course</TableHead>
+                  <TableHead className="w-[120px] font-semibold">
+                    Year
+                  </TableHead>
+                  <TableHead className="w-[140px] font-semibold">
+                    Semester
+                  </TableHead>
+                  <TableHead className="w-[120px] hidden sm:table-cell font-semibold">
+                    Regulation
+                  </TableHead>
+                  <TableHead className="hidden md:table-cell font-semibold">
+                    Course
+                  </TableHead>
                   <TableHead className="font-semibold">Subject</TableHead>
-                  <TableHead className="w-[100px] hidden lg:table-cell font-semibold">Files</TableHead>
-                  <TableHead className="w-[140px] text-center font-semibold">Actions</TableHead>
+                  <TableHead className="w-[100px] hidden lg:table-cell font-semibold">
+                    Files
+                  </TableHead>
+                  <TableHead className="w-[140px] text-center font-semibold">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {pdfUploads?.map((upload: any) => (
                   <TableRow key={upload.id} className="hover:bg-muted/50">
-                    <TableCell className="font-medium">{upload.academicYear.year}</TableCell>
+                    <TableCell className="font-medium">
+                      {upload.academicYear.year}
+                    </TableCell>
                     <TableCell>{upload.academicYear.semester}</TableCell>
-                    <TableCell className="hidden sm:table-cell">{upload.regulation}</TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      {upload.regulation}
+                    </TableCell>
                     <TableCell className="hidden md:table-cell max-w-[200px] truncate">
                       {upload.course}
                     </TableCell>
-                    <TableCell className="max-w-[200px] truncate">{upload.subject}</TableCell>
+                    <TableCell className="max-w-[200px] truncate">
+                      {upload.subject}
+                    </TableCell>
                     <TableCell className="hidden lg:table-cell">
                       {upload.files.length} file(s)
                     </TableCell>
@@ -309,17 +331,21 @@ export default function PDFUploadPage() {
                           <Trash2 className="h-4 w-4 text-red-500" />
                           <span className="sr-only text-red-500">Delete</span>
                         </Button>
-                        {upload.files.map((file: any, index: number) => (
+                        {upload.files.map((file:any, index:any) => (
                           <Button
                             key={index}
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleDownload(upload.id, index)}
+                            onClick={() =>
+                              handleDownload(upload.id, file.fileName)
+                            }
                             disabled={isDownloading}
                             className="h-8 w-8 text-muted-foreground hover:text-primary"
                           >
                             <Download className="h-4 w-4 text-blue-500" />
-                            <span className="sr-only text-blue-500">Download file {index + 1}</span>
+                            <span className="sr-only text-blue-500">
+                              Download file {index + 1}
+                            </span>
                           </Button>
                         ))}
                       </div>
@@ -337,7 +363,7 @@ export default function PDFUploadPage() {
             </Table>
           </div>
         </div>
-  
+
         {/* Upload/Edit Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
@@ -346,10 +372,12 @@ export default function PDFUploadPage() {
                 {editingId ? "Edit PDF Upload" : "Upload New PDF"}
               </DialogTitle>
               <DialogDescription>
-                {editingId ? "Modify the existing PDF details" : "Add new PDFs to the collection"}
+                {editingId
+                  ? "Modify the existing PDF details"
+                  : "Add new PDFs to the collection"}
               </DialogDescription>
             </DialogHeader>
-  
+
             <div className="grid gap-6 py-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Year and Semester Group */}
@@ -361,7 +389,10 @@ export default function PDFUploadPage() {
                       onValueChange={(value) =>
                         setNewUpload({
                           ...newUpload,
-                          academicYear: { ...newUpload.academicYear, year: value },
+                          academicYear: {
+                            ...newUpload.academicYear,
+                            year: value,
+                          },
                         })
                       }
                     >
@@ -377,7 +408,7 @@ export default function PDFUploadPage() {
                       </SelectContent>
                     </Select>
                   </div>
-  
+
                   <div className="space-y-2">
                     <Label htmlFor="semester">Semester</Label>
                     <Select
@@ -385,7 +416,10 @@ export default function PDFUploadPage() {
                       onValueChange={(value) =>
                         setNewUpload({
                           ...newUpload,
-                          academicYear: { ...newUpload.academicYear, semester: value },
+                          academicYear: {
+                            ...newUpload.academicYear,
+                            semester: value,
+                          },
                         })
                       }
                     >
@@ -402,7 +436,7 @@ export default function PDFUploadPage() {
                     </Select>
                   </div>
                 </div>
-  
+
                 {/* Course and Subject Group */}
                 <div className="space-y-4">
                   <div className="space-y-2">
@@ -428,7 +462,7 @@ export default function PDFUploadPage() {
                       </SelectContent>
                     </Select>
                   </div>
-  
+
                   <div className="space-y-2">
                     <Label htmlFor="course">Course</Label>
                     <Input
@@ -441,7 +475,7 @@ export default function PDFUploadPage() {
                   </div>
                 </div>
               </div>
-  
+
               {/* Subject and Units */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
@@ -454,7 +488,7 @@ export default function PDFUploadPage() {
                     }
                   />
                 </div>
-  
+
                 <div className="space-y-2">
                   <Label htmlFor="units">Units</Label>
                   <Select
@@ -476,7 +510,7 @@ export default function PDFUploadPage() {
                   </Select>
                 </div>
               </div>
-  
+
               {/* File Upload Section */}
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -497,12 +531,15 @@ export default function PDFUploadPage() {
                         e.target.value = "";
                         return;
                       }
-                      setSelectedFiles((prevFiles) => [...prevFiles, ...newFiles]);
+                      setSelectedFiles((prevFiles) => [
+                        ...prevFiles,
+                        ...newFiles,
+                      ]);
                       e.target.value = "";
                     }}
                   />
                 </div>
-  
+
                 {/* Selected Files List */}
                 {selectedFiles.length > 0 && (
                   <div className="space-y-2">
@@ -527,7 +564,9 @@ export default function PDFUploadPage() {
                               className="text-destructive hover:text-destructive/90"
                             >
                               <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Remove {file.name}</span>
+                              <span className="sr-only">
+                                Remove {file.name}
+                              </span>
                             </Button>
                           </li>
                         ))}
@@ -537,7 +576,7 @@ export default function PDFUploadPage() {
                 )}
               </div>
             </div>
-  
+
             <DialogFooter>
               <Button
                 onClick={editingId ? handleUpdate : handleAdd}
@@ -572,14 +611,15 @@ export default function PDFUploadPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-  
+
         {/* Delete Confirmation Dialog */}
         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Confirm Deletion</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete this PDF? This action cannot be undone.
+                Are you sure you want to delete this PDF? This action cannot be
+                undone.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -606,7 +646,7 @@ export default function PDFUploadPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-  
+
         {/* Loading State */}
         {isLoading && (
           <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">

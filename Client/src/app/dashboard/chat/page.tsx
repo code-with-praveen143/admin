@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Plus, Send, Loader2, Edit, Pencil } from "lucide-react";
+import { Plus, Send, Loader2, Edit, Pencil, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -38,6 +38,7 @@ export default function Chatbot() {
   const [chatHistory, setChatHistory] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { theme, setTheme } = useTheme();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   // Fetch data using hooks
   const {
     data: pdfUploads,
@@ -227,6 +228,32 @@ export default function Chatbot() {
     }
   };
 
+  const handleChatSelection = async (chatId: string) => {
+    try {
+      setIsSidebarOpen(false); // Close the sidebar when a chat is selected
+  
+      // Fetch chat history for the selected chat
+      const response = await fetch(
+        `${BASE_URL}/api/chat/${chatId}/history?userId=${userId}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to load chat messages");
+      }
+  
+      const data = await response.json();
+  
+      // Update the messages state with the selected chat's messages
+      setMessages(data.messages || []);
+  
+      // Scroll to the bottom of the chat
+      scrollToBottom();
+    } catch (error) {
+      console.error("Error loading selected chat:", error);
+      toast.error("Failed to load chat messages. Please try again.");
+    }
+  };
+  
+
   // Categorize chats
   const categorizeChats = (chats: any) => {
     const today = new Date();
@@ -284,16 +311,40 @@ export default function Chatbot() {
             : "bg-white border-gray-200"
         )}
       >
-        <h1 className="text-lg font-semibold">Chatbot</h1>
-        <div className="flex items-center space-x-2">
-          <Button
-            onClick={() => setStep("initial")}
-            className="md:hidden bg-gray-700 hover:bg-gray-600 text-white"
-          >
-            <Plus className="h-4 w-4" />
-          </Button>
-        </div>
+         <h1 className="hidden md:block text-xl font-bold text-gray-800 dark:text-white">Chatbot</h1>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden"
+          onClick={() => setIsSidebarOpen(true)}
+        >
+          <Menu className="h-6 w-6 text-gray-800 dark:text-white" />
+        </Button>
       </header>
+
+      {/* Chat History Sidebar for Mobile */}
+      {isSidebarOpen && (
+        <div className="fixed inset-0 z-20 bg-black bg-opacity-50">
+          <aside className="absolute top-0 left-0 h-full w-64 bg-white dark:bg-gray-800 shadow-lg">
+            <div className="p-4 border-b">
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-white">Chat History</h2>
+            </div>
+            <ScrollArea className="p-4 space-y-2">
+              {chatHistory.map((chat, index) => (
+                <Button
+                  key={index}
+                  variant="ghost"
+                  className="w-full justify-start truncate"
+                  onClick={() => handleChatSelection(chat.chatId)}
+                >
+                  {chat.title}
+                </Button>
+              ))}
+            </ScrollArea>
+          </aside>
+        </div>
+      )}
+
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}

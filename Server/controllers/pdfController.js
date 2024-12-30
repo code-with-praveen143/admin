@@ -1,6 +1,6 @@
 const PdfUpload = require("../models/PdfUpload");
 const multer = require("multer");
-const fs = require("fs/promises");
+const fs = require("fs"); // Add this import at the top of your controller file
 const path = require("path");
 
 const pdfController = {
@@ -171,14 +171,14 @@ const pdfController = {
     try {
       const { id, fileName } = req.params;
 
-      // Find the corresponding PDF
+      // Fetch the PDF metadata from the database
       const pdf = await PdfUpload.findOne({ id: parseInt(id) });
 
       if (!pdf) {
         return res.status(404).json({ error: "PDF document not found" });
       }
 
-      // Verify the file exists in the PDF document
+      // Verify if the requested file exists in the document's file list
       const file = pdf.files.find((file) => file.fileName === fileName);
 
       if (!file) {
@@ -188,18 +188,25 @@ const pdfController = {
       }
 
       // Build the file path
-      const filePath = path.join(__dirname, "../uploaders", fileName);
+      const filePath = path.resolve(__dirname, "../uploads", fileName);
 
-      // Serve the file
+      // Check if the file exists in the uploads folder
+      if (!fs.existsSync(filePath)) {
+        return res
+          .status(404)
+          .json({ error: "File does not exist on the server" });
+      }
+
+      // Serve the file as a downloadable response
       res.download(filePath, fileName, (err) => {
         if (err) {
           console.error("Error downloading file:", err);
-          res.status(500).json({ error: "Failed to download file" });
+          return res.status(500).json({ error: "Failed to download file" });
         }
       });
     } catch (err) {
       console.error("Error downloading PDF:", err);
-      res.status(500).json({ error: "Failed to download PDF" });
+      return res.status(500).json({ error: "Failed to download PDF" });
     }
   },
 
@@ -339,32 +346,32 @@ const pdfController = {
   },
 
   // Download specific PDF file
-  downloadPdf: async (req, res) => {
-    try {
-      const { id, fileIndex } = req.params;
-      const pdf = await PdfUpload.findOne({ id: parseInt(id) });
+  // downloadPdf: async (req, res) => {
+  //   try {
+  //     const { id, fileIndex } = req.params;
+  //     const pdf = await PdfUpload.findOne({ id: parseInt(id) });
 
-      if (!pdf) {
-        return res.status(404).json({ error: "PDF document not found" });
-      }
+  //     if (!pdf) {
+  //       return res.status(404).json({ error: "PDF document not found" });
+  //     }
 
-      if (!pdf.files[fileIndex]) {
-        return res.status(404).json({ error: "PDF file not found" });
-      }
+  //     if (!pdf.files[fileIndex]) {
+  //       return res.status(404).json({ error: "PDF file not found" });
+  //     }
 
-      const file = pdf.files[fileIndex];
+  //     const file = pdf.files[fileIndex];
 
-      res.set({
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${file.fileName}"`,
-      });
+  //     res.set({
+  //       "Content-Type": "application/pdf",
+  //       "Content-Disposition": `attachment; filename="${file.fileName}"`,
+  //     });
 
-      res.send(file.fileData);
-    } catch (err) {
-      console.error("Error downloading PDF:", err);
-      res.status(500).json({ error: "Failed to download PDF" });
-    }
-  },
+  //     res.send(file.fileData);
+  //   } catch (err) {
+  //     console.error("Error downloading PDF:", err);
+  //     res.status(500).json({ error: "Failed to download PDF" });
+  //   }
+  // },
 
   // Download all PDFs as ZIP
   downloadAllPdfs: async (req, res) => {
@@ -443,25 +450,25 @@ const pdfController = {
   getPdfsByRegulation: async (req, res) => {
     try {
       const { regulation } = req.query;
-  
+
       if (!regulation) {
         return res.status(400).json({
           error: "Regulation parameter is required",
         });
       }
-  
+
       // Find PDFs matching the provided regulation
       const pdfs = await PdfUpload.find({ regulation });
-  
+
       if (!pdfs || pdfs.length === 0) {
         return res.status(404).json({
           error: "No PDFs found for the provided regulation",
         });
       }
-  
+
       // Base URL for file access
       const baseUrl = "http://localhost:5001/uploads";
-  
+
       // Format the response
       const pdfResults = pdfs.map((pdf) => ({
         id: pdf.id,
@@ -469,7 +476,7 @@ const pdfController = {
         regulation: pdf.regulation,
         subject: pdf.subject,
       }));
-  
+
       res.status(200).json({
         success: true,
         pdfs: pdfResults,
@@ -481,8 +488,7 @@ const pdfController = {
         details: err.message,
       });
     }
-  }
-  
+  },
 };
 
 module.exports = pdfController;

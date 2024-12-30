@@ -198,7 +198,7 @@ export function Navbar() {
     <>
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center mx-auto relative">
-          <Button
+          {role == "SuperAdmin" && <Button
             variant="ghost"
             size="icon"
             className="lg:hidden"
@@ -206,7 +206,9 @@ export function Navbar() {
           >
             <Menu className="h-6 w-6" />
           </Button>
-
+          }
+          { role == "Student" && <Bot className="h-6 w-6 lg:hidden" />
+          }
           <div className="absolute left-1/2 transform -translate-x-1/2 lg:relative lg:left-0 lg:transform-none lg:flex-1">
             <Image
               src={theme === "dark" ? logo3 : logo}
