@@ -2,6 +2,25 @@
 
 // http://localhost:5001/uploads\thumbnail-1730617594375-907275613.png
 const nextConfig = {
+  async headers() {
+    return [
+      {
+        source: '/api/pdfs',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/json',
+          },
+        ],
+      },
+    ];
+  },
+  api: {
+    bodyParser: {
+      sizeLimit: '50mb' // Adjust this value as needed
+    },
+    responseLimit: '50mb'
+  },
   images: {
     remotePatterns: [
       {
