@@ -506,6 +506,7 @@ export default function PDFUploadPage() {
                       <SelectItem value="3rd unit">Unit 3</SelectItem>
                       <SelectItem value="4th unit">Unit 4</SelectItem>
                       <SelectItem value="5th unit">Unit 5</SelectItem>
+                      <SelectItem value="6th unit">Unit 6</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

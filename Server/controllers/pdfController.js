@@ -183,6 +183,7 @@ const pdfController = {
         "3rd Unit",
         "4th Unit",
         "5th Unit",
+        "6th Unit"
       ];
       if (units && !validUnits.includes(units)) {
         return res.status(400).json({

@@ -34,7 +34,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: [
-      "http://localhost:3001", // Localhost frontend
+      "http://localhost:3000", // Localhost frontend
       "https://community.campusify.io", // Vercel deployed frontend
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
@@ -48,7 +48,7 @@ const io = new Server(server, {
 app.use(
   cors({
     origin: [
-      "http://localhost:3001", // Localhost frontend
+      "http://localhost:3000", // Localhost frontend
       "https://community.campusify.io", // Vercel deployed frontend
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],

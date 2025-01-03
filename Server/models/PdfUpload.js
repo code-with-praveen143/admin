@@ -46,7 +46,7 @@ const PdfUploadSchema = mongoose.Schema({
   units: {
     type: [String],
     required: true,
-    enum: ["1st unit", "2nd unit", "3rd unit", "4th unit", "5th unit"],
+    enum: ["1st unit", "2nd unit", "3rd unit", "4th unit", "5th unit", "6th unit"],
   },
   files: [FileSchema], // Array of files
   uploadDate: {
