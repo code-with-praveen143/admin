@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Search, FileText, Briefcase, X } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useState, useEffect } from "react";
+import { Search, FileText, Briefcase, X, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -11,57 +11,64 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   Select,
   SelectItem,
   SelectTrigger,
   SelectValue,
   SelectContent,
-} from "@/components/ui/select"
-import { useGetStudents, useRegisterStudentForEvent, Student } from "@/app/hooks/students/useGetStudents"
-import { useEvents } from "@/app/hooks/events/EvenetManagement"
-import { useGetColleges } from "@/app/hooks/colleges/useGetColleges"
+} from "@/components/ui/select";
+import {
+  useGetStudents,
+  useRegisterStudentForEvent,
+  Student,
+} from "@/app/hooks/students/useGetStudents";
+import { useEvents } from "@/app/hooks/events/EvenetManagement";
+import { useGetColleges } from "@/app/hooks/colleges/useGetColleges";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function StudentDetailsPage() {
-  const { data: students = [], isLoading, error } = useGetStudents()
-  const registerStudentMutation = useRegisterStudentForEvent()
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
-  const [selectedCollege, setSelectedCollege] = useState<string | null>(null)
+  const { toast } = useToast();
+  const { data: students = [], isLoading, error } = useGetStudents();
+  const registerStudentMutation = useRegisterStudentForEvent();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [selectedCollege, setSelectedCollege] = useState<string | null>(null);
   const { data: events } = useEvents();
   const { data: collegeList } = useGetColleges();
 
-  const [selectedEvent, setSelectedEvent] = useState<string | null>(null)
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
       student?.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student?.program?.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCollege = !selectedCollege || student.collegeName?.includes(selectedCollege)
-    return matchesSearch && matchesCollege
-  })
+      student?.program?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCollege =
+      !selectedCollege || student.collegeName?.includes(selectedCollege);
+    return matchesSearch && matchesCollege;
+  });
 
   const handleRegisterForEvent = (userId: string) => {
-    setSelectedStudent(students.find(s => s.id === userId) || null)
-    setSelectedEvent(null)
-  }
+    setSelectedStudent(students.find((s) => s.id === userId) || null);
+    setSelectedEvent(null);
+  };
 
   const handleConfirmRegistration = async () => {
     if (selectedStudent && selectedEvent) {
@@ -69,63 +76,77 @@ export default function StudentDetailsPage() {
         await registerStudentMutation.mutateAsync({
           userId: selectedStudent.id,
           eventId: selectedEvent,
-        })
-        setToast({ message: "Student has been registered for the event.", type: 'success' })
+        });
+        toast({
+          title: "Success",
+          description: "Student has been registered for the event.",
+          variant: "default",
+        });
       } catch (error: any) {
         if (error.response && error.response.data) {
-          const { success, message } = error.response.data
-          if (!success) {
-            setToast({ message, type: 'error' })
-          }
+          const { message } = error.response.data;
+          toast({
+            title: "Error",
+            description: message || "Failed to register the student.",
+            variant: "destructive",
+          });
         } else {
-          setToast({ message: "This student is already registered for this event.", type: 'error' })
+          toast({
+            title: "Error",
+            description: "This student is already registered for this event.",
+            variant: "destructive",
+          });
         }
       }
     }
+  };
+
+  if (isLoading) {
+    toast({
+      title: "Loading",
+      description: "Fetching students details, please wait...",
+      variant: "default",
+    });
+
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
   }
+  if (error) {
+    toast({
+      title: "Error",
+      description: error.message,
+      variant: "destructive",
+    });
 
-  useEffect(() => {
-    if (toast) {
-      const timer = setTimeout(() => {
-        setToast(null)
-      }, 5000)
-      return () => clearTimeout(timer)
-    }
-  }, [toast])
-
-  if (isLoading) return <p>Loading...</p>
-  if (error) return <p>Error: {error.message}</p>
-
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-red-500">{error.message}</p>
+      </div>
+    );
+  }
   return (
     <div className="relative">
-      {toast && (
-        <div className={`fixed top-4 right-4 z-50 p-4 rounded-md shadow-md ${
-          toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
-        } text-white flex items-center justify-between`}>
-          <span>{toast.message}</span>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setToast(null)}
-            className="ml-2 text-white hover:text-gray-200"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
-      )}
+      <Toaster />
       <Card className="w-full">
         <CardHeader className="space-y-1">
           <CardTitle className="text-xl md:text-2xl font-bold lg:text-3xl text-primary">
             Student Details
           </CardTitle>
           <CardDescription className="text-sm md:text-base text-gray-400">
-            View and manage student information, print documents, and internship applications.
+            View and manage student information, print documents, and internship
+            applications.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="w-full sm:w-1/3">
-              <Label htmlFor="college-select" className="text-sm font-medium mb-1.5 block text-secondary">
+              <Label
+                htmlFor="college-select"
+                className="text-sm font-medium mb-1.5 block text-secondary"
+              >
                 Select College
               </Label>
               <Select onValueChange={(value) => setSelectedCollege(value)}>
@@ -133,7 +154,7 @@ export default function StudentDetailsPage() {
                   <SelectValue placeholder="Choose a College" />
                 </SelectTrigger>
                 <SelectContent>
-                  {collegeList?.map((college: any, index:any) => (
+                  {collegeList?.map((college: any, index: any) => (
                     <SelectItem key={index} value={college}>
                       {college.collegeName}
                     </SelectItem>
@@ -142,7 +163,10 @@ export default function StudentDetailsPage() {
               </Select>
             </div>
             <div className="flex-1">
-              <Label htmlFor="search" className="text-sm font-medium mb-1.5 block text-secondary">
+              <Label
+                htmlFor="search"
+                className="text-sm font-medium mb-1.5 block text-secondary"
+              >
                 Search Students
               </Label>
               <div className="flex gap-2">
@@ -164,7 +188,9 @@ export default function StudentDetailsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
-                  <TableHead className="hidden sm:table-cell">Registration ID</TableHead>
+                  <TableHead className="hidden sm:table-cell">
+                    Registration ID
+                  </TableHead>
                   <TableHead className="hidden md:table-cell">Course</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -174,10 +200,16 @@ export default function StudentDetailsPage() {
                   <TableRow key={student.id}>
                     <TableCell className="font-medium">
                       <div>{student.username}</div>
-                      <div className="text-sm text-muted-foreground sm:hidden">{student.id}</div>
+                      <div className="text-sm text-muted-foreground sm:hidden">
+                        {student.id}
+                      </div>
                     </TableCell>
-                    <TableCell className="hidden sm:table-cell">{student.id}</TableCell>
-                    <TableCell className="hidden md:table-cell">{student.program}</TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      {student.id}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {student.program}
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Dialog>
@@ -193,19 +225,26 @@ export default function StudentDetailsPage() {
                           </DialogTrigger>
                           <DialogContent className="sm:max-w-[425px]">
                             <DialogHeader>
-                              <DialogTitle className="text-lg">Print Documents</DialogTitle>
+                              <DialogTitle className="text-lg">
+                                Print Documents
+                              </DialogTitle>
                             </DialogHeader>
                             <div className="py-4">
                               <h3 className="font-medium text-base mb-3">
                                 Documents for {selectedStudent?.username}
                               </h3>
                               <ul className="space-y-2">
-                                {selectedStudent?.printDocuments?.map((doc, index) => (
-                                  <li key={index} className="flex items-center gap-2">
-                                    <FileText className="h-4 w-4 text-muted-foreground" />
-                                    {doc}
-                                  </li>
-                                ))}
+                                {selectedStudent?.printDocuments?.map(
+                                  (doc, index) => (
+                                    <li
+                                      key={index}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <FileText className="h-4 w-4 text-muted-foreground" />
+                                      {doc}
+                                    </li>
+                                  )
+                                )}
                               </ul>
                             </div>
                           </DialogContent>
@@ -223,19 +262,26 @@ export default function StudentDetailsPage() {
                           </DialogTrigger>
                           <DialogContent className="sm:max-w-[425px]">
                             <DialogHeader>
-                              <DialogTitle className="text-lg">Internship Applications</DialogTitle>
+                              <DialogTitle className="text-lg">
+                                Internship Applications
+                              </DialogTitle>
                             </DialogHeader>
                             <div className="py-4">
                               <h3 className="font-medium text-base mb-3">
                                 Applications for {selectedStudent?.username}
                               </h3>
                               <ul className="space-y-2">
-                                {selectedStudent?.internshipApplications?.map((app, index) => (
-                                  <li key={index} className="flex items-center gap-2">
-                                    <Briefcase className="h-4 w-4 text-muted-foreground" />
-                                    {app}
-                                  </li>
-                                ))}
+                                {selectedStudent?.internshipApplications?.map(
+                                  (app, index) => (
+                                    <li
+                                      key={index}
+                                      className="flex items-center gap-2"
+                                    >
+                                      <Briefcase className="h-4 w-4 text-muted-foreground" />
+                                      {app}
+                                    </li>
+                                  )
+                                )}
                               </ul>
                             </div>
                           </DialogContent>
@@ -252,19 +298,28 @@ export default function StudentDetailsPage() {
                           </DialogTrigger>
                           <DialogContent className="sm:max-w-[425px]">
                             <DialogHeader>
-                              <DialogTitle className="text-lg">Select Event</DialogTitle>
+                              <DialogTitle className="text-lg">
+                                Select Event
+                              </DialogTitle>
                             </DialogHeader>
                             <div className="py-4">
                               <h3 className="font-medium text-base mb-3">
                                 Events for {selectedStudent?.username}
                               </h3>
-                              <Select onValueChange={(value) => setSelectedEvent(value)}>
+                              <Select
+                                onValueChange={(value) =>
+                                  setSelectedEvent(value)
+                                }
+                              >
                                 <SelectTrigger className="w-full">
                                   <SelectValue placeholder="Choose an Event" />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {events?.map((event: any) => (
-                                    <SelectItem key={event._id} value={event._id}>
+                                    <SelectItem
+                                      key={event._id}
+                                      value={event._id}
+                                    >
                                       {event.title}
                                     </SelectItem>
                                   ))}
@@ -273,7 +328,10 @@ export default function StudentDetailsPage() {
                               <Button
                                 className="mt-4 w-full"
                                 onClick={handleConfirmRegistration}
-                                disabled={!selectedEvent || registerStudentMutation.isPending}
+                                disabled={
+                                  !selectedEvent ||
+                                  registerStudentMutation.isPending
+                                }
                               >
                                 Confirm Registration
                               </Button>
@@ -290,6 +348,5 @@ export default function StudentDetailsPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
-

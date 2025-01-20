@@ -1,12 +1,12 @@
-'use client'
+"use client";
 
-import { useState } from "react"
-import { Plus, Pencil, Trash2 } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { useGetUsers } from "@/app/hooks/userMangementData/useGetUsers"
-import { useUpdateUser } from "@/app/hooks/userMangementData/useUpdateUser"
-import { useDeleteUser } from "@/app/hooks/userMangementData/useDeleteUser"
-import { useCreateUser } from "@/app/hooks/userMangementData/useCreateUser"
+import { useState } from "react";
+import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useGetUsers } from "@/app/hooks/userMangementData/useGetUsers";
+import { useUpdateUser } from "@/app/hooks/userMangementData/useUpdateUser";
+import { useDeleteUser } from "@/app/hooks/userMangementData/useDeleteUser";
+import { useCreateUser } from "@/app/hooks/userMangementData/useCreateUser";
 import {
   Table,
   TableBody,
@@ -14,42 +14,50 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { toast } from "sonner"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/components/ui/use-toast";
 
 interface User {
-  id: string
-  username: string
-  email: string
-  role: "Admin" | "Uploader"
-  active: boolean
+  id: string;
+  username: string;
+  email: string;
+  role: "Admin" | "Uploader";
+  active: boolean;
 }
 
 interface UserFormData {
-  id?: string
-  username: string
-  email: string
-  password: any
-  role: "Admin" | "Uploader"
-  active: boolean
+  id?: string;
+  username: string;
+  email: string;
+  password: any;
+  role: "Admin" | "Uploader";
+  active: boolean;
 }
 
 const defaultUser: UserFormData = {
@@ -58,27 +66,27 @@ const defaultUser: UserFormData = {
   password: "",
   role: "Uploader",
   active: true,
-}
+};
 
-function UserForm({ 
-  user, 
-  isEditMode, 
-  isLoading, 
-  onSubmit, 
-  onCancel 
+function UserForm({
+  user,
+  isEditMode,
+  isLoading,
+  onSubmit,
+  onCancel,
 }: {
-  user: UserFormData
-  isEditMode: boolean
-  isLoading: boolean
-  onSubmit: (userData: UserFormData) => void
-  onCancel: () => void
+  user: UserFormData;
+  isEditMode: boolean;
+  isLoading: boolean;
+  onSubmit: (userData: UserFormData) => void;
+  onCancel: () => void;
 }) {
-  const [formData, setFormData] = useState<UserFormData>(user)
+  const [formData, setFormData] = useState<UserFormData>(user);
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSubmit(formData)
-  }
+    e.preventDefault();
+    onSubmit(formData);
+  };
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-4 py-4">
@@ -87,7 +95,9 @@ function UserForm({
         <Input
           id="username"
           value={formData.username}
-          onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+          onChange={(e) =>
+            setFormData({ ...formData, username: e.target.value })
+          }
           required
         />
       </div>
@@ -110,7 +120,9 @@ function UserForm({
             id="password"
             type="password"
             value={formData.password || ""}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, password: e.target.value })
+            }
             required={!isEditMode}
           />
         </div>
@@ -139,7 +151,9 @@ function UserForm({
         <Switch
           id="status"
           checked={formData.active}
-          onCheckedChange={(checked) => setFormData({ ...formData, active: checked })}
+          onCheckedChange={(checked) =>
+            setFormData({ ...formData, active: checked })
+          }
         />
       </div>
 
@@ -152,87 +166,144 @@ function UserForm({
         </Button>
       </div>
     </form>
-  )
+  );
 }
 
 export default function Component() {
-  const { data: fetchedUsers, isLoading: isLoadingUsers } = useGetUsers()
-  const updateUserMutation = useUpdateUser()
-  const createUserMutation = useCreateUser()
-  const deleteUserMutation = useDeleteUser()
+  const { toast } = useToast();
+  const { data: fetchedUsers, isLoading: isLoadingUsers, error: error } = useGetUsers();
+  const updateUserMutation = useUpdateUser();
+  const createUserMutation = useCreateUser();
+  const deleteUserMutation = useDeleteUser();
 
-  const users = fetchedUsers?.users || []
-  const [selectedUser, setSelectedUser] = useState<UserFormData>(defaultUser)
-  const [isEditMode, setIsEditMode] = useState(false)
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const users = fetchedUsers?.users || [];
+  const [selectedUser, setSelectedUser] = useState<UserFormData>(defaultUser);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleEdit = (userId: string) => {
-    const userToEdit = users.find((user) => user.id === userId)
+    const userToEdit = users.find((user) => user.id === userId);
     if (userToEdit) {
-      setSelectedUser({ ...userToEdit, password: undefined })
-      setIsEditMode(true)
-      setIsDialogOpen(true)
+      setSelectedUser({ ...userToEdit, password: undefined });
+      setIsEditMode(true);
+      setIsDialogOpen(true);
     }
-  }
+  };
 
   const handleUpdate = async (userData: UserFormData) => {
     try {
-      if (!isEditMode || !userData.id) throw new Error("Invalid edit operation")
+      if (!isEditMode || !userData.id)
+        throw new Error("Invalid edit operation");
       await updateUserMutation.mutateAsync({
         userId: userData.id,
         userData: {
           email: userData.email,
           role: userData.role,
           active: userData.active,
-          ...(userData.password ? { password: userData.password } : {})
+          ...(userData.password ? { password: userData.password } : {}),
         },
-      })
-      toast.success("User updated successfully")
-      setIsDialogOpen(false)
-      resetForm()
+      });
+      toast({
+        title: "User Updated",
+        description: "The user has been updated successfully.",
+        variant: "default",
+      });
+      setIsDialogOpen(false);
+      resetForm();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to update user"
-      )
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to update user.",
+        variant: "destructive",
+      });
     }
-  }
+  };
 
   const handleCreate = async (userData: UserFormData) => {
     try {
-      await createUserMutation.mutateAsync(userData)
-      toast.success("User created successfully")
-      setIsDialogOpen(false)
-      resetForm()
+      await createUserMutation.mutateAsync(userData);
+      toast({
+        title: "User Created",
+        description: "The user has been added successfully.",
+        variant: "default",
+      });
+      setIsDialogOpen(false);
+      resetForm();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to create user"
-      )
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to create user.",
+        variant: "destructive",
+      });
     }
-  }
+  };
 
-  const handleDelete = (userId: string) => {
-    if (!userId) return
-    deleteUserMutation.mutate(userId)
-  }
+  const handleDelete = async (userId: string) => {
+    if (!userId) return;
+    try {
+      await deleteUserMutation.mutateAsync(userId);
+      toast({
+        title: "User Deleted",
+        description: "The user has been deleted successfully.",
+        variant: "default",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete user. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const resetForm = () => {
-    setSelectedUser(defaultUser)
-    setIsEditMode(false)
-  }
+    setSelectedUser(defaultUser);
+    setIsEditMode(false);
+  };
 
   if (isLoadingUsers) {
-    return <div>Loading...</div>
+    toast({
+      title: "Loading",
+      description: "Fetching user details, please wait...",
+      variant: "default",
+    });
+
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    toast({
+      title: "Error",
+      description: error.message,
+      variant: "destructive",
+    });
+
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-red-500">{error.message}</p>
+      </div>
+    );
   }
 
   return (
     <div className="flex flex-col min-h-screen">
+      <Toaster />
       <div className="container mx-auto">
         <Card className="shadow-lg rounded-lg">
           <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4">
             <div>
-              <CardTitle className="text-2xl font-bold text-primary">User Management</CardTitle>
+              <CardTitle className="text-2xl font-bold text-primary">
+                User Management
+              </CardTitle>
               <CardDescription className="text-sm md:text-base text-gray-400">
-                Manage admin and uploader accounts with role-based access control.
+                Manage admin and uploader accounts with role-based access
+                control.
               </CardDescription>
             </div>
             <Dialog
@@ -277,7 +348,9 @@ export default function Component() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Username</TableHead>
-                    <TableHead className="hidden sm:table-cell">Email</TableHead>
+                    <TableHead className="hidden sm:table-cell">
+                      Email
+                    </TableHead>
                     <TableHead className="hidden md:table-cell">Role</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -296,7 +369,9 @@ export default function Component() {
                       <TableCell className="hidden md:table-cell">
                         {user.role}
                       </TableCell>
-                      <TableCell>{user.active ? "Active" : "Inactive"}</TableCell>
+                      <TableCell>
+                        {user.active ? "Active" : "Inactive"}
+                      </TableCell>
                       <TableCell className="text-right">
                         <Button
                           variant="outline"
@@ -325,5 +400,4 @@ export default function Component() {
       </div>
     </div>
   );
-  
 }

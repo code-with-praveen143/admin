@@ -1,90 +1,90 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import dynamic from "next/dynamic";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { useEffect, useState } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useLogin } from "../hooks/auth/useAuth";
-import { useRouter } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
-import logo from "../../utils/logo.png";
-import logo3 from "../../utils/logo3.jpeg";
-import { useTheme } from "next-themes";
+import Link from "next/link"
+import dynamic from "next/dynamic"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { useEffect, useState } from "react"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { useLogin } from "../hooks/auth/useAuth"
+import { useRouter } from "next/navigation"
+import { Eye, EyeOff } from "lucide-react"
+import logo from "../../utils/logo.png"
+import logo3 from "../../utils/logo3.jpeg"
+import { useTheme } from "next-themes"
+import { useToast } from "@/components/ui/use-toast"
+import { Toaster } from "@/components/ui/toaster"
+
 type LoginRequest = {
-  email: string;
-  password: string;
-};
+  email: string
+  password: string
+}
 
-const ClientSideImage = dynamic(() => import("next/image"), { ssr: false });
-const queryClient = new QueryClient();
+const ClientSideImage = dynamic(() => import("next/image"), { ssr: false })
+const queryClient = new QueryClient()
 const signInSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
-  password: z
-    .string()
-    .min(8, { message: "Password must be at least 8 characters" }),
-});
+  password: z.string().min(8, { message: "Password must be at least 8 characters" }),
+})
+
 function LoginPageContent() {
-  const [isClient, setIsClient] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
-  const { theme, setTheme } = useTheme();
+  const [isClient, setIsClient] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const router = useRouter()
+  const { theme } = useTheme()
+  const { toast } = useToast()
   const signInForm = useForm({
     resolver: zodResolver(signInSchema),
     defaultValues: {
       email: "",
       password: "",
     },
-  });
+  })
 
   useEffect(() => {
-    setIsClient(true);
-  }, []);
+    setIsClient(true)
+  }, [])
 
-  const loginMutation = useLogin();
+  const loginMutation = useLogin()
 
   const onSignInSubmit = async (data: LoginRequest) => {
     try {
-      const response = await loginMutation.mutateAsync(data);
-      console.log("Login successful:", response);
+      const response = await loginMutation.mutateAsync(data)
+      console.log("Login successful:", response)
       // Store the token in localStorage or a secure cookie
-      sessionStorage.setItem("auth_token", response.token);
-      sessionStorage.setItem("username", response.user.username);
-      sessionStorage.setItem("email", response.user.email);
-      sessionStorage.setItem("user_id", response.user._id);
-      sessionStorage.setItem("regulation", response.user.regulation);
-      sessionStorage.setItem("role", response.user.role);
+      sessionStorage.setItem("auth_token", response.token)
+      sessionStorage.setItem("username", response.user.username)
+      sessionStorage.setItem("email", response.user.email)
+      sessionStorage.setItem("user_id", response.user._id)
+      sessionStorage.setItem("regulation", response.user.regulation)
+      sessionStorage.setItem("role", response.user.role)
+
+      toast({
+        title: "Login Successful",
+        description: "Welcome back!",
+        variant: "default",
+      })
+
       // Redirect to dashboard or home page
-      if(response.user.role === "Student"){
-      router.push("/dashboard/chat");
-      }
-      else{
-        router.push("/dashboard");
+      if (response.user.role === "Student") {
+        router.push("/dashboard/chat")
+      } else {
+        router.push("/dashboard")
       }
     } catch (error) {
-      console.error("Login error:", error);
-      setError("Invalid credentials. Please try again.");
+      console.error("Login error:", error)
+      toast({
+        title: "Login Failed",
+        description: "Invalid credentials. Please try again.",
+        variant: "destructive",
+      })
     }
-  };
+  }
 
   return (
     <div className="min-h-screen w-full bg-white dark:bg-black">
@@ -119,9 +119,7 @@ function LoginPageContent() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl dark:text-white">
-                    Welcome back
-                  </h1>
+                  <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl dark:text-white">Welcome back</h1>
                   <p className="text-sm text-muted-foreground sm:text-base dark:text-gray-400">
                     Enter your credentials to sign in to your account
                   </p>
@@ -130,10 +128,7 @@ function LoginPageContent() {
             </CardHeader>
             <CardContent className="space-y-6">
               <Form {...signInForm}>
-                <form
-                  onSubmit={signInForm.handleSubmit(onSignInSubmit)}
-                  className="space-y-4"
-                >
+                <form onSubmit={signInForm.handleSubmit(onSignInSubmit)} className="space-y-4">
                   <FormField
                     control={signInForm.control}
                     name="email"
@@ -190,24 +185,16 @@ function LoginPageContent() {
                             >
                               {showPassword ? (
                                 <EyeOff
-                                  className={`h-6 w-6 text-${
-                                    theme === "dark" ? "white" : "gray-800"
-                                  }`}
+                                  className={`h-6 w-6 text-${theme === "dark" ? "white" : "gray-800"}`}
                                   aria-hidden="true"
                                 />
                               ) : (
                                 <Eye
-                                  className={`h-6 w-6 text-${
-                                    theme === "dark" ? "white" : "gray-800"
-                                  }`}
+                                  className={`h-6 w-6 text-${theme === "dark" ? "white" : "gray-800"}`}
                                   aria-hidden="true"
                                 />
                               )}
-                              <span className="sr-only">
-                                {showPassword
-                                  ? "Hide password"
-                                  : "Show password"}
-                              </span>
+                              <span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
                             </Button>
                           </div>
                         </FormControl>
@@ -257,13 +244,15 @@ function LoginPageContent() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 export default function LoginPage() {
   return (
     <QueryClientProvider client={queryClient}>
       <LoginPageContent />
+      <Toaster />
     </QueryClientProvider>
-  );
+  )
 }
+

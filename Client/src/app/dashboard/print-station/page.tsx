@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/components/ui/use-toast";
 
 type PrintOrder = {
   id: number;
@@ -39,6 +41,7 @@ type PrintOrder = {
 };
 
 export default function PrintStationPage() {
+  const { toast } = useToast();
   const [printOrders, setPrintOrders] = useState<PrintOrder[]>([
     {
       id: 1,
@@ -63,6 +66,11 @@ export default function PrintStationPage() {
         order.id === id ? { ...order, status: "approved" } : order
       )
     );
+    toast({
+      title: "Order Approved",
+      description: "The print order has been approved.",
+      variant: "default",
+    });
   };
 
   const handleReject = (id: number) => {
@@ -71,6 +79,11 @@ export default function PrintStationPage() {
         order.id === id ? { ...order, status: "rejected" } : order
       )
     );
+    toast({
+      title: "Order Rejected",
+      description: "The print order has been rejected.",
+      variant: "destructive",
+    });
   };
 
   const handleSetDeliveryDate = () => {
@@ -82,12 +95,18 @@ export default function PrintStationPage() {
             : order
         )
       );
+      toast({
+        title: "Delivery Date Set",
+        description: `Delivery date set for ${selectedOrder.studentName}'s order.`,
+        variant: "default",
+      });
       setSelectedOrder(null);
     }
   };
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-6 lg:p-8">
+      <Toaster />
       <div className="mx-auto max-w-7xl space-y-6">
         {/* Header Section */}
         <div className="flex flex-col space-y-2">

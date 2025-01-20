@@ -53,10 +53,12 @@ import {
   useDeleteCard,
   useUpdateCard,
 } from "@/app/hooks/cardData/useCardData";
+import { useToast } from "@/components/ui/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 // Types remain the same
 type Card = {
-  _id: string;
+  _id?: string;
   title: string;
   description: string;
   imageUrl: string;
@@ -116,123 +118,155 @@ const TechUniversityForm = ({
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-[1400px] mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-        <Card className="border shadow-sm">
-          <CardHeader className="space-y-1 px-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <CardTitle className="text-2xl font-bold">
-                  Cards Management
-                </CardTitle>
-                <CardDescription>
-                  Manage and organize card information for your platform
-                </CardDescription>
-              </div>
-              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button size="sm" className="whitespace-nowrap">
-                    <Plus className="mr-2 h-4 w-4" /> Add Card Data
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="w-full max-w-lg">
-                  <DialogHeader className="mb-4">
-                    <DialogTitle className="text-lg">Add New Card</DialogTitle>
-                  </DialogHeader>
-                  <TechUniversityForm onSubmit={handleSubmit} />
-                </DialogContent>
-              </Dialog>
-            </div>
-          </CardHeader>
-          <CardContent className="px-6 pt-6">
-            <div className="rounded-lg border bg-card">
-              <div className="relative overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-muted/50">
-                      <TableHead className="text-xs font-semibold">
-                        Title
-                      </TableHead>
-                      <TableHead className="text-xs font-semibold">
-                        Description
-                      </TableHead>
-                      <TableHead className="text-xs font-semibold whitespace-nowrap">
-                        Allow All
-                      </TableHead>
-                      <TableHead className="text-xs font-semibold whitespace-nowrap">
-                        Specific College
-                      </TableHead>
-                      <TableHead className="text-xs font-semibold whitespace-nowrap">
-                        Exclude College
-                      </TableHead>
-                      <TableHead className="text-xs font-semibold">
-                        Order
-                      </TableHead>
-                      <TableHead className="text-xs font-semibold w-[100px]">
-                        Actions
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {cards?.map((card: Card) => (
-                      <TableRow key={card._id} className="hover:bg-muted/50">
-                        <TableCell className="text-xs font-medium">
-                          {card.title}
-                        </TableCell>
-                        <TableCell className="text-xs max-w-[200px] truncate">
-                          {card.description}
-                        </TableCell>
-                        <TableCell className="text-xs">
-                          {card.allowAll ? "Yes" : "No"}
-                        </TableCell>
-                        <TableCell className="text-xs">
-                          {card.specificCollege || "N/A"}
-                        </TableCell>
-                        <TableCell className="text-xs">
-                          {card.excludeCollege || "N/A"}
-                        </TableCell>
-                        <TableCell className="text-xs">{card.order}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-7 w-7 p-0"
-                            >
-                              <Pencil className="h-3 w-3 text-blue-500" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-7 w-7 p-0"
-                            >
-                              <Trash2 className="h-3 w-3 text-red-500" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="w-full max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Edit Card</DialogTitle>
-          </DialogHeader>
-          {editingCard && (
-            <TechUniversityForm
-              initialData={editingCard}
-              onSubmit={handleSave}
+    <div className="w-full max-w-lg mx-auto">
+         <Toaster />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-3">
+          <FormField
+            control={form.control}
+            name="title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm">Title</FormLabel>
+                <FormControl>
+                  <Input {...field} className="text-sm h-8" />
+                </FormControl>
+                <FormMessage className="text-xs" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm">Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    {...field}
+                    className="text-sm min-h-[60px] max-h-[100px]"
+                  />
+                </FormControl>
+                <FormMessage className="text-xs" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="imageUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm">Image URL</FormLabel>
+                <FormControl>
+                  <Input {...field} className="text-sm h-8" />
+                </FormControl>
+                <FormMessage className="text-xs" />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="allowAll"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-x-2 space-y-0">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    className="mt-1"
+                  />
+                </FormControl>
+                <div className="space-y-0.5">
+                  <FormLabel className="text-sm">Allow All</FormLabel>
+                  <FormDescription className="text-xs">
+                    Check this if the Card is for all colleges
+                  </FormDescription>
+                </div>
+              </FormItem>
+            )}
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <FormField
+              control={form.control}
+              name="specificCollege"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm">Specific College</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value || undefined}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="text-sm h-8">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="engineering">Engineering</SelectItem>
+                      <SelectItem value="science">Science</SelectItem>
+                      <SelectItem value="arts">Arts</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
             />
-          )}
-        </DialogContent>
-      </Dialog>
+            <FormField
+              control={form.control}
+              name="excludeCollege"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm">Exclude College</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value || undefined}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="text-sm h-8">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="engineering">Engineering</SelectItem>
+                      <SelectItem value="science">Science</SelectItem>
+                      <SelectItem value="arts">Arts</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
+            />
+          </div>
+          <FormField
+            control={form.control}
+            name="order"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-sm">Order</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(parseInt(e.target.value, 10))
+                    }
+                    className="text-sm h-8"
+                  />
+                </FormControl>
+                <FormMessage className="text-xs" />
+              </FormItem>
+            )}
+          />
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            size="sm"
+            className="w-auto"
+          >
+            {isSubmitting ? "Submitting..." : "Submit"}
+          </Button>
+        </form>
+      </Form>
     </div>
   );
 };
@@ -240,6 +274,7 @@ export default function TechUniversityTable() {
   const [editingCard, setEditingCard] = useState<Card | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: cards, isLoading, error } = useCards();
@@ -258,8 +293,17 @@ export default function TechUniversityTable() {
       queryClient.setQueryData(["cards"], (oldData: Card[] | undefined) =>
         oldData ? oldData.filter((card) => card._id !== id) : []
       );
+      toast({
+        title: "Card Deleted",
+        description: "The card has been successfully deleted.",
+        variant: "default",
+      });
     } catch (error) {
-      console.error("Error deleting Card:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete the card. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -267,7 +311,7 @@ export default function TechUniversityTable() {
     try {
       if (editingCard) {
         const result = await updateCardMutation.mutateAsync({
-          id: editingCard._id,
+          id: editingCard._id!,
           ...updatedCard,
         });
         queryClient.setQueryData(["cards"], (oldData: Card[] | undefined) =>
@@ -279,9 +323,18 @@ export default function TechUniversityTable() {
         );
         setEditingCard(null);
         setIsEditDialogOpen(false);
+        toast({
+          title: "Card Updated",
+          description: "The card has been successfully updated.",
+          variant: "default",
+        });
       }
     } catch (error) {
-      console.error("Error updating Card:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update the card. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -300,24 +353,43 @@ export default function TechUniversityTable() {
         oldData ? [...oldData, addedCard] : [addedCard]
       );
       setIsAddDialogOpen(false);
+      toast({
+        title: "Card Added",
+        description: "The new card has been successfully added.",
+        variant: "default",
+      });
     } catch (error) {
-      console.error("Error adding Card:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add the card. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
-  if (isLoading){
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
       </div>
     );
   }
-  if (error) return <div>An error occurred: {error.message}</div>;
+  if (error) {
+    toast({
+      title: "Error",
+      description: "An error occurred while loading the cards.",
+      variant: "destructive",
+    });
+    return <div>An error occurred: {error.message}</div>;
+  }
 
   return (
     <div className="container mx-auto px-4 py-6 md:py-10 space-y-6">
+         <Toaster />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h2 className="text-xl md:text-2xl lg:text-3xl text-primary font-bold">Cards Management</h2>
+        <h2 className="text-xl md:text-2xl lg:text-3xl text-primary font-bold">
+          Cards Management
+        </h2>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button size="sm" className="w-auto">
@@ -387,7 +459,7 @@ export default function TechUniversityTable() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleDelete(card._id)}
+                      onClick={() => card._id && handleDelete(card._id)}
                     >
                       <Trash2 className="h-3 w-3 text-red-500" />
                     </Button>

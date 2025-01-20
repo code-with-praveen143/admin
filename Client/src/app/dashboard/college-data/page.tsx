@@ -20,8 +20,11 @@ import { useGetRegulations } from "@/app/hooks/regulations/useGetRegulations";
 import CollegeDataForm from "@/app/components/Forms/collegeForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CollegeData, CollegeExportData } from "@/app/@types/college";
+import { useToast } from "@/components/ui/use-toast";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function CollegeDataPage() {
+  const { toast } = useToast();
   // Hooks
   const { data: collegeData, isLoading, error } = useGetColleges();
   const { data: regulationsData, isError } = useGetRegulations();
@@ -55,6 +58,11 @@ export default function CollegeDataPage() {
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     saveAs(blob, "college_data.csv");
+    toast({
+      title: "Export Successful",
+      description: "The college data has been exported to CSV.",
+      variant: "default",
+    });
   };
 
   // Handle create/update submission
@@ -93,15 +101,18 @@ export default function CollegeDataPage() {
       </div>
     );
   }
-  if (error)
-    return (
-      <div>
-        Error: {error instanceof Error ? error.message : "An error occurred"}
-      </div>
-    );
+  if (error) {
+    toast({
+      title: "Error",
+      description: "Failed to fetch college data.",
+      variant: "destructive",
+    });
+    return <div>Error: {error.message}</div>;
+  }
 
   return (
     <div className="min-h-screen bg-background">
+      <Toaster />
       <div className="container mx-auto p-4 md:p-6 lg:p-8 max-w-7xl">
         <Card className="shadow-lg">
           <CardHeader className="p-4 md:p-6 space-y-4">

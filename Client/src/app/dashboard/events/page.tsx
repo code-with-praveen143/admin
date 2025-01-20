@@ -48,6 +48,8 @@ import {
   EventAddress,
 } from "@/app/hooks/events/EvenetManagement";
 import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/components/ui/use-toast";
 
 interface EventFormValues {
   title: string;
@@ -78,15 +80,25 @@ const EventCard = ({
   onClick: () => void;
 }) => {
   const deleteEvent = useDeleteEvent();
-
+  const { toast } = useToast();
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (window.confirm("Are you sure you want to delete this event?")) {
       try {
         await deleteEvent.mutateAsync(event._id);
+        toast({
+          title: "Event Deleted",
+          description: "The event has been successfully deleted.",
+          variant: "default",
+        });
         onDelete(event._id);
       } catch (error) {
         console.error("Error deleting event:", error);
+        toast({
+          title: "Error",
+          description: "Failed to delete the event. Please try again.",
+          variant: "destructive",
+        });
       }
     }
   };
@@ -104,6 +116,7 @@ const EventCard = ({
       className="group h-full transition-all hover:shadow-lg"
       onClick={onClick}
     >
+      <Toaster />
       <div className="relative aspect-video overflow-hidden">
         <Image
           src={getImageUrl(event.thumbnail)}
@@ -220,7 +233,7 @@ const EventManagement = () => {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
-
+  const { toast } = useToast();
   const { data: events, isLoading, error } = useEvents();
   const { data: students = [], isLoading: isLoadingStudents } =
     useGetStudents();
@@ -287,16 +300,30 @@ const EventManagement = () => {
           id: selectedEvent._id,
           formData,
         });
+        toast({
+          title: "Event Updated",
+          description: "The event has been successfully updated.",
+          variant: "default",
+        });
       } else {
         if (!thumbnail) {
           throw new Error("Thumbnail is required for new events");
         }
         await createEvent.mutateAsync(formData);
+        toast({
+          title: "Event Created",
+          description: "The event has been successfully created.",
+          variant: "default",
+        });
       }
 
       handleCloseDialog();
     } catch (error) {
-      console.error("Error submitting event:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit the event. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -341,10 +368,20 @@ const EventManagement = () => {
           eventId: selectedEventId,
         });
         setIsStudentDialogOpen(false);
+        toast({
+          title: "Registration Successful",
+          description:
+            "The student has been successfully registered for the event.",
+          variant: "default",
+        });
         // Optionally, show a success message or update the UI
       } catch (error) {
         console.error("Error registering student for event:", error);
-        // Optionally, show an error message
+        toast({
+          title: "Error",
+          description: "Failed to register the student. Please try again.",
+          variant: "destructive",
+        });
       }
     }
   };
@@ -371,6 +408,7 @@ const EventManagement = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Toaster />
       <div className="container mx-auto px-4 py-6 lg:px-8 max-w-7xl">
         {/* Header Section */}
         <div className="mb-8 space-y-4">
@@ -383,6 +421,7 @@ const EventManagement = () => {
                 Create and manage event information
               </p>
             </div>
+
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button size="sm" className="shrink-0">
@@ -683,16 +722,24 @@ const EventManagement = () => {
 
         {/* Events Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-          {events?.map((event: Event) => (
-            <EventCard
-              key={event._id}
-              event={event}
-              onEdit={handleEditEvent}
-              onDelete={(id) => console.log("Delete event:", id)}
-              onRegister={handleRegisterClick}
-              onClick={() => handleEventClick(event._id)}
-            />
-          ))}
+          {events?.length === 0 ? (
+            <div className="flex items-center justify-center col-span-full">
+              <p className="text-muted-foreground">
+                No events found. Click on the button above to create a new event.
+              </p>
+            </div>
+          ) : (
+            events?.map((event: Event) => (
+              <EventCard
+                key={event._id}
+                event={event}
+                onEdit={handleEditEvent}
+                onDelete={(id) => console.log("Delete event:", id)}
+                onRegister={handleRegisterClick}
+                onClick={() => handleEventClick(event._id)}
+              />
+            ))
+          )}
         </div>
 
         {/* Student Selection Dialog - Keep position fixed */}

@@ -10,40 +10,40 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  const userRole =
-    typeof window !== "undefined" ? sessionStorage.getItem("role") : null;
+  const userRole = typeof window !== "undefined" ? sessionStorage.getItem("role") : null;
 
   if (userRole === "Student") {
     // Render Chatbot UI for Student role
     return (
-      <div className="relative min-h-screen flex flex-col bg-background">
+      <div className="relative flex flex-col h-screen bg-background">
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <Navbar />
-        <Chatbot />
+          <Navbar />
         </header>
-        
+        <div className="flex-1 overflow-y-auto">
+          <Chatbot />
+        </div>
+        <Footer />
       </div>
     );
   }
 
   // Render the default layout for other roles
   return (
-    <div className="relative min-h-screen flex flex-col bg-background">
-      {/* Header */}
+    <div className="relative flex flex-col h-screen bg-background">
       {userRole === "SuperAdmin" && (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <Navbar />
         </header>
       )}
 
-      <div className="flex-1 flex flex-col lg:flex-row">
+      <div className="flex flex-1 overflow-hidden">
         {userRole === "SuperAdmin" && (
           <>
             {/* Mobile sidebar */}
             <aside
-              className={`fixed inset-y-0 left-0 z-50 w-64 bg-background transform ${
+              className={`fixed inset-y-0 left-0 z-40 w-64 bg-background transform ${
                 sidebarOpen ? "translate-x-0" : "-translate-x-full"
-              } transition-transform duration-300 ease-in-out lg:hidden`}
+              } transition-transform duration-300 ease-in-out lg:hidden overflow-y-auto pt-16`}
             >
               <div className="h-16 flex items-center justify-between px-4 border-b">
                 <span className="text-lg font-semibold">Dashboard</span>
@@ -68,7 +68,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             </aside>
 
             {/* Desktop sidebar */}
-            <aside className="hidden lg:block w-64 flex-shrink-0 border-r bg-background">
+            <aside className="hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:z-30 lg:w-64 lg:border-r lg:bg-background pt-16">
               <div className="h-full overflow-y-auto">
                 <Sidebar />
               </div>
@@ -77,19 +77,18 @@ export function AppLayout({ children }: AppLayoutProps) {
         )}
 
         {/* Main Content Area */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {children}
-          </div>
+        <main className="flex-1 overflow-y-auto pt-16 lg:ml-64">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">{children}</div>
         </main>
       </div>
 
+      {/* Fixed Footer */}
       <Footer />
 
       {/* Overlay for mobile sidebar */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black bg-opacity-50 lg:hidden"
+          className="fixed inset-0 z-30 bg-black bg-opacity-50 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}

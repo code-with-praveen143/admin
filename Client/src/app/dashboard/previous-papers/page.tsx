@@ -43,6 +43,9 @@ import { useCreatePreviousPaper } from "@/app/hooks/previousPapers/useCreatePrev
 import { useDownloadPreviousPaper } from "@/app/hooks/previousPapers/useDownloadPreviousPapers";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/components/ui/use-toast";
+
 type PreviousPaperUpload = {
   id: number;
   academicYear: {
@@ -61,6 +64,7 @@ type PreviousPaperUpload = {
 };
 
 export default function PreviousPaperUploadPage() {
+  const { toast } = useToast();
   const [newUpload, setNewUpload] = useState<
     Omit<PreviousPaperUpload, "id" | "files" | "uploadDate">
   >({
@@ -121,12 +125,12 @@ export default function PreviousPaperUploadPage() {
         !newUpload.subject ||
         !selectedDate
       ) {
-        toast.error("All fields are required");
+        toast({ title: "Error", description: "All fields are required", variant: "destructive" });
         return;
       }
 
       if (selectedFiles.length === 0) {
-        toast.error("Please select at least one PDF file");
+        toast({ title: "Error", description: "Please select at least one PDF file", variant: "destructive" });
         return;
       }
 
@@ -152,7 +156,7 @@ export default function PreviousPaperUploadPage() {
 
       await createPreviousPaperMutation.mutateAsync(formData);
 
-      toast.success("Previous papers uploaded successfully");
+      toast({ title: "Success", description: "Previous papers uploaded successfully", variant: "default" });
 
       setIsDialogOpen(false);
       setNewUpload({
@@ -169,7 +173,7 @@ export default function PreviousPaperUploadPage() {
       setSelectedDate(new Date());
     } catch (error: any) {
       console.error("Error uploading previous papers:", error);
-      toast.error(error.message || "Failed to upload previous papers");
+      toast({ title: "Error", description: error.message || "Failed to upload previous papers", variant: "destructive" });
     }
   };
 
@@ -207,7 +211,8 @@ export default function PreviousPaperUploadPage() {
         !newUpload.subject ||
         !selectedDate
       ) {
-        toast.error("All fields are required");
+        toast({ title: "Error", description: "All fields are required", variant: "destructive" });
+
         return;
       }
 
@@ -236,7 +241,7 @@ export default function PreviousPaperUploadPage() {
         formData,
       });
 
-      toast.success("Previous paper updated successfully");
+      toast({ title: "Success", description: "Previous paper updated successfully", variant: "default" });
 
       setIsDialogOpen(false);
       setEditingId(null);
@@ -254,7 +259,7 @@ export default function PreviousPaperUploadPage() {
       setSelectedDate(new Date());
     } catch (error: any) {
       console.error("Error updating previous paper:", error);
-      toast.error(error.message || "Failed to update previous paper");
+      toast({ title: "Error", description: "Failed to update previous paper", variant: "destructive" });
     }
   };
 
@@ -268,27 +273,32 @@ export default function PreviousPaperUploadPage() {
 
     try {
       await deletePreviousPaperMutation.mutateAsync(deletingId);
-      toast.success("Previous paper deleted successfully");
+      toast({ title: "Success", description: "Previous paper deleted successfully", variant: "default" });
+
       setIsDeleteDialogOpen(false);
       setDeletingId(null);
     } catch (error: any) {
       console.error("Error deleting previous paper:", error);
-      toast.error(error.message || "Failed to delete previous paper");
+      toast({ title: "Error", description: "Error deleting previous paper", variant: "destructive" });
+
     }
   };
 
   const handleDownload = async (id: number, fileIndex: number) => {
     try {
       await downloadPreviousPaper(id, fileIndex);
-      toast.success("Previous paper downloaded successfully");
+      toast({ title: "Success", description: "Previous paper downloaded successfully", variant: "default" });
+
     } catch (error: any) {
       console.error("Error downloading previous paper:", error);
-      toast.error(error.message || "Failed to download previous paper");
+      toast({ title: "Error", description: "Failed to download previous paper", variant: "destructive" });
+
     }
   };
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-6 lg:p-8">
+      <Toaster />
       <div className="mx-auto max-w-7xl space-y-6">
         {/* Header Section */}
         <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:items-center md:justify-between">
@@ -533,7 +543,7 @@ export default function PreviousPaperUploadPage() {
                         (file) => file.type !== "application/pdf"
                       );
                       if (invalidFiles.length > 0) {
-                        toast.error("Only PDF files are allowed");
+                        toast({ title: "Error", description: "Only PDF files are allowed", variant: "destructive" });
                         e.target.value = "";
                         return;
                       }

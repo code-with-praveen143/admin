@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -42,6 +42,8 @@ import { useGetRegulations } from '@/app/hooks/regulations/useGetRegulations'
 import { useCreateRegulation } from '@/app/hooks/regulations/useCreateRegulation'
 import { useDeleteRegulation } from '@/app/hooks/regulations/useDeleteRegulation'
 import { useUpdateRegulation } from '@/app/hooks/regulations/useUpdateRegulation'
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Regulation {
   _id: string
@@ -57,10 +59,11 @@ const formSchema = z.object({
 })
 
 export default function Component() {
+  const {toast} = useToast();
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-  const { data: regulations, isLoading } = useGetRegulations()
+  const { data: regulations, isLoading, error } = useGetRegulations()
   const { mutate: createRegulation } = useCreateRegulation()
   const { mutate: updateRegulation } = useUpdateRegulation()
   const { mutate: deleteRegulation } = useDeleteRegulation()
@@ -78,20 +81,39 @@ export default function Component() {
     if (editingId) {
       updateRegulation({ id: editingId, data }, {
         onSuccess: () => {
-          toast.success('Regulation updated successfully')
+          toast({
+            title: "Success",
+            description: "Regulation updated successfully",
+            variant: "default",
+          });
           setEditingId(null)
           setIsDialogOpen(false)
         },
-        onError: () => toast.error('Failed to update regulation')
+        onError: () => {
+          toast({
+            title: "Error",
+            description: "Failed to update regulation",
+            variant: "destructive",
+          });
+        }
       })
     } else {
       createRegulation(data, {
         onSuccess: () => {
-          toast.success('Regulation created successfully')
-          setIsDialogOpen(false)
+          toast({
+            title: "Success",
+            description: "Regulation created successfully",
+            variant: "default",
+          });          setIsDialogOpen(false)
         },
-        onError: () => toast.error('Failed to create regulation')
-      })
+        onError: () => {
+          toast({
+            title: "Error",
+            description: "Failed to create regulation",
+            variant: "destructive",
+          });
+        }
+      });
     }
     form.reset()
   }
@@ -108,15 +130,53 @@ export default function Component() {
 
   const handleDelete = (id: string) => {
     deleteRegulation(id, {
-      onSuccess: () => toast.success('Regulation deleted successfully'),
-      onError: () => toast.error('Failed to delete regulation')
-    })
-  }
+      onSuccess: () => {
+        toast({
+          title: "Success",
+          description: "Regulation deleted successfully",
+          variant: "default",
+        });
+      },
+      onError: () => {
+        toast({
+          title: "Error",
+          description: "Failed to delete regulation",
+          variant: "destructive",
+        });
+      },
+    });
+  };
+  
+  if (isLoading) {
+    toast({
+      title: "Loading",
+      description: "Fetching students details, please wait...",
+      variant: "default",
+    });
 
-  if (isLoading) return <div>Loading...</div>
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
+  if (error) {
+    toast({
+      title: "Error",
+      description: error.message,
+      variant: "destructive",
+    });
+
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-red-500">{error.message}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
+      <Toaster />
       <div className="container mx-auto p-4">
         <Card className="shadow-lg rounded-lg">
           <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4">

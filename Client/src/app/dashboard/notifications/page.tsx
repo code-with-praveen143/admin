@@ -30,8 +30,10 @@ import { useGetNotifications } from "@/app/hooks/notification/useGetNotification
 import { useDeleteNotification } from "@/app/hooks/notification/useDeleteNotification";
 import { cn } from "@/lib/utils";
 import { useTheme } from "next-themes";
-
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/components/ui/use-toast";
 export default function NotificationsPage() {
+  const { toast } = useToast();
   const { data: notifications, isLoading } = useGetNotifications();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -43,21 +45,21 @@ export default function NotificationsPage() {
     e.preventDefault();
     try {
       await createNotification.mutateAsync({ title, description });
-      toast.success("Notification created successfully");
+      toast({ title: "Success", description: "Notification created successfully", variant: "default" });
       setOpen(false);
       setTitle("");
       setDescription("");
     } catch {
-      toast.error("Failed to create notification");
+      toast({ title: "Error", description: "Failed to create notification", variant: "destructive" });
     }
   };
 
   const handleDelete = async (id: string) => {
     try {
       await deleteNotification.mutateAsync(id);
-      toast.success("Notification deleted successfully");
+      toast({ title: "Success", description: "Notification deleted successfully", variant: "default" });
     } catch {
-      toast.error("Failed to delete notification");
+      toast({ title: "Error", description: "Failed to delete notification", variant: "destructive" });
     }
   };
 
@@ -85,6 +87,7 @@ export default function NotificationsPage() {
   return (
     <>
     <div className="container mx-auto px-4 py-8">
+      <Toaster />
     <Card
        className={cn(
          "w-full shadow-lg rounded-lg",

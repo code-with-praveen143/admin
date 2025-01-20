@@ -41,6 +41,8 @@ import { useUpdatePdf } from "@/app/hooks/pdfUploads/useUpdatePdf";
 import { useDeletePdf } from "@/app/hooks/pdfUploads/useDeletePdf";
 import { useDownloadPdf } from "@/app/hooks/pdfUploads/useDownloadPdf";
 import { useGetRegulations } from "@/app/hooks/regulations/useGetRegulations";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/components/ui/use-toast";
 
 type PDFUpload = {
   id: number;
@@ -57,6 +59,7 @@ type PDFUpload = {
 };
 
 export default function PDFUploadPage() {
+  const { toast } = useToast();
   const [newUpload, setNewUpload] = useState<
     Omit<PDFUpload, "id" | "files" | "uploadDate">
   >({
@@ -105,13 +108,13 @@ export default function PDFUploadPage() {
         !newUpload.course ||
         !newUpload.subject
       ) {
-        toast.error("All fields are required");
+        toast({ title: "Error", description: "Please fill all fields", variant: "destructive" });
         return;
       }
 
       // Validate files
       if (selectedFiles.length === 0) {
-        toast.error("Please select at least one PDF file");
+        toast({ title: "Error", description: "Please select at least one PDF", variant: "destructive" });
         return;
       }
 
@@ -137,7 +140,7 @@ export default function PDFUploadPage() {
       // Submit the form using a mutation or API call
       await createPdfMutation.mutateAsync(formData);
 
-      toast.success("PDFs uploaded successfully");
+      toast({ title: "Success", description: "PDF uploaded successfully", variant: "default" });
 
       // Reset form after successful upload
       setIsDialogOpen(false);
@@ -151,7 +154,7 @@ export default function PDFUploadPage() {
       setSelectedFiles([]);
     } catch (error: any) {
       console.error("Error uploading PDFs:", error);
-      toast.error(error.message || "Failed to upload PDFs");
+      toast({ title: "Error", description: error.message || "Failed to upload PDF", variant: "destructive" });
     }
   };
 
@@ -185,7 +188,7 @@ export default function PDFUploadPage() {
       };
 
       await updatePdfMutation.mutateAsync(updatedPdf);
-      toast.success("PDF updated successfully");
+      toast({ title: 'Success', description: 'Updated Pdf Successfully', variant: 'default' });
 
       setIsDialogOpen(false);
       setEditingId(null);
@@ -199,7 +202,7 @@ export default function PDFUploadPage() {
       setSelectedFiles([]);
     } catch (error: any) {
       console.error("Error updating PDF:", error);
-      toast.error(error.message || "Failed to update PDF");
+      toast({ title: 'Error', description: error.message || 'Failed to update PDF', variant: 'destructive' });
     }
   };
 
@@ -213,22 +216,22 @@ export default function PDFUploadPage() {
 
     try {
       await deletePdfMutation.mutateAsync(deletingId);
-      toast.success("PDF deleted successfully");
+      toast({ title: 'Success', description: 'PDF deleted successfully', variant: 'default' });
       setIsDeleteDialogOpen(false);
       setDeletingId(null);
     } catch (error: any) {
       console.error("Error deleting PDF:", error);
-      toast.error(error.message || "Failed to delete PDF");
+      toast({ title: 'Error', description: error.message || 'Failed to delete PDF', variant : 'destructive' });
     }
   };
 
   const handleDownload = async (id: any, fileName: any) => {
     try {
       await downloadPdf(id, fileName);
-      toast.success("PDF downloaded successfully");
+      toast({  title: 'Success', description: 'PDF downloaded successfully', variant: 'default' });
     } catch (error:any) {
       console.error("Error downloading PDF:", error);
-      toast.error(error.message || "Failed to download PDF");
+      toast({ title: 'Error', description: error.message || 'Failed to download PDF', variant: 'destructive' });
     }
   };
   
@@ -243,6 +246,7 @@ export default function PDFUploadPage() {
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-6 lg:p-8">
+      <Toaster />
       <div className="mx-auto max-w-7xl space-y-6">
         {/* Header Section */}
         <div className="flex flex-col space-y-4 md:space-y-0 md:flex-row md:items-center md:justify-between">
@@ -528,7 +532,7 @@ export default function PDFUploadPage() {
                         (file) => file.type !== "application/pdf"
                       );
                       if (invalidFiles.length > 0) {
-                        toast.error("Only PDF files are allowed");
+                        toast({ title: "Error", description: "Only PDF files are allowed", variant: "destructive" });
                         e.target.value = "";
                         return;
                       }

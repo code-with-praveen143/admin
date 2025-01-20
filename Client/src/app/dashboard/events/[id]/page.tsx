@@ -22,6 +22,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { BASE_URL } from "@/app/utils/constants";
 import Link from "next/link";
+import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/components/ui/use-toast";
 
 interface Address {
   street: string;
@@ -92,7 +94,7 @@ const EventDetails = () => {
     queryKey: ["event", eventId],
     queryFn: () => fetchEventDetails(eventId),
   });
-
+  const { toast } = useToast();
   const {
     data: students,
     isLoading: isStudentsLoading,
@@ -113,23 +115,34 @@ const EventDetails = () => {
   const error = eventError || studentsError;
 
   if (isLoading) {
+    toast({
+      title: "Loading",
+      description: "Fetching event details, please wait...",
+      variant: "default",
+    });
+  
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="w-8 h-8 animate-spin" />
       </div>
     );
   }
-
   if (error) {
+    toast({
+      title: "Error",
+      description: error.message,
+      variant: "destructive",
+    });
+  
     return (
       <div className="flex items-center justify-center min-h-screen">
         <p className="text-red-500">{error.message}</p>
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-background p-4 md:p-6 lg:p-8">
+      <Toaster />
       <div className="flex justify-end">
         <Link href="/dashboard/events" passHref>
           <span className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary border border-transparent rounded-md shadow-sm hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
