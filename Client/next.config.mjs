@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 
-// http://localhost:5001/uploads\thumbnail-1730617594375-907275613.png
 const nextConfig = {
   async headers() {
     return [
